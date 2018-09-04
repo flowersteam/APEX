@@ -1,0 +1,3 @@
+# Returns image from the camera.
+---
+std_msgs/Float32[] image
