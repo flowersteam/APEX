@@ -18,7 +18,7 @@
       <node name="joystick_publisher" pkg="apex_playground" type="hardware_joystick_publisher.py" output="$(arg output)" respawn="true"/>
       <node name="environment" pkg="apex_playground" type="environment.py" output="$(arg output)" respawn="true"/>
       <node name="ergo" pkg="apex_playground" type="ergo.py" output="$(arg output)" respawn="true"/>
-      <node name="camera" pkg="apex_playground" type="camera.py", output="$(arg output)" respawn="true"/>
+      <node name="camera" pkg="apex_playground" type="camera.py" output="$(arg output)" respawn="true"/>
       <node if="$(arg light)" name="light_controller" pkg="apex_playground" type="light.py" launch-prefix="sudo -E PYTHONPATH=$(env PYTHONPATH)" output="$(arg output)" respawn="true"/>
 
   </group>
