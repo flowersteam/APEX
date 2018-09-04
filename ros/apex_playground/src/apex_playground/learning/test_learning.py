@@ -1,90 +1,70 @@
 import numpy as np
-from environment_explauto.environment import TestEnvironment
-from learning import Learning
+from tqdm import tqdm
+
+from environment_explauto.armball import TestArmBallEnv, TestArmBallObsEnv
+from environment_explauto.armballs import TestArmBallsEnv, TestArmBallsObsEnv
+from mugllearning import Learning
 
         
 if __name__ == "__main__":
     
-    print "Create environment"
-    environment = TestEnvironment()
+    print("Create environment")
+    environment = TestArmBallEnv()
+    environment = TestArmBallsObsEnv()
     
-    print "Create agent"
+    print("Create agent")
     learning = Learning(dict(m_mins=environment.conf.m_mins,
                              m_maxs=environment.conf.m_maxs,
                              s_mins=environment.conf.s_mins,
-                             s_maxs=environment.conf.s_maxs), condition="AMB")
+                             s_maxs=environment.conf.s_maxs),
+                        condition="MGEVAE", explo_noise=0.01, choice_eps=0.1)
     learning.start()
     
-    print
-    print "Do 100 autonomous steps:" 
+    print()
+    print("Do 100 autonomous steps:") 
     for i in range(100):
         context = environment.get_current_context()
         m = learning.produce(context)
         s = environment.update(m)
         learning.perceive(s)
+        learning.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
+    
+    print()
+    print("Saving current data to file")
+    learning.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
+    
+    print("Data before saving")
+    print(learning.agent.t)
+    print(learning.agent.interests_evolution["mod1"][-10:])
+    print(learning.agent.progresses_evolution["mod1"][-10:])
+    print(learning.agent.chosen_modules[-10:])
+    print(len(learning.agent.modules["mod1"].sensorimotor_model.model.imodel.fmodel.dataset))
+    print(len(learning.agent.modules["mod2"].sensorimotor_model.model.imodel.fmodel.dataset))
+    print(learning.agent.modules["mod1"].interest_model.current_interest)
+
+    print()
+    print("Do 150 autonomous steps:")
+    for i in range(150):
+        context = environment.get_current_context()
+        m = learning.produce(context)
+        s = environment.update(m)
+        learning.perceive(s)
+    
+    print("Rebuilding agent from file")
+    learning.restart_from_files(experiment_name="test", task="mge_fi", trial=0, iteration=101, folder="../../../../../data/test")
         
-    print "Do 1 arm demonstration"
-    m_demo_traj = np.zeros((25, 4)) + 0.001
-    m_demo = environment.torsodemo2m(m_demo_traj)
-    print "m_demo", m_demo
-    s = environment.update(m_demo)
-    learning.perceive(s, m_demo=m_demo)
+    print("Data after rebuilding")
+    print(learning.agent.t)
+    print(learning.agent.interests_evolution["mod1"][-10:])
+    print(learning.agent.progresses_evolution["mod1"][-10:])
+    print(learning.agent.chosen_modules[-10:])
+    print(len(learning.agent.modules["mod1"].sensorimotor_model.model.imodel.fmodel.dataset))
+    print(len(learning.agent.modules["mod2"].sensorimotor_model.model.imodel.fmodel.dataset))
+    print(learning.agent.modules["mod1"].interest_model.current_interest)
     
-    print "Should replay arm demo:" 
-    context = environment.get_current_context()
-    m = learning.produce(context)
-    print "m", m
-    s = environment.update(m)
-    learning.perceive(s)
-    
-    print
-    print "Do 1 joystick demonstration to show how to produce light"
-    j_demo = [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.2, 0.001, 0., 0., 0., 0., 0.]
-    s = environment.get_current_context() + [0.] * 30 + j_demo + [0.]*20 + [0.2]*20 + [0.2]*20 + [0.1]*10 + [0.]*10
-    #print "j_demo", s, len(s)
-    learning.perceive(s, j_demo=True)
-    
-    print "Now ask to produce light..."
-    learning.produce(environment.get_current_context(), "s_light")
-    
-    
-    
-    print
-    print "Saving current data to file"
-    learning.save("../../../../../data/test.pickle")
-    
-#     print "Data before saving"
-#     print learning.agent.t
-#     print learning.agent.interests_evolution["mod1"][-10:]
-#     print learning.agent.progresses_evolution["mod1"][-10:]
-#     print learning.agent.chosen_modules[-10:]
-#     print len(learning.agent.modules["mod1"].sensorimotor_model.model.imodel.fmodel.dataset)
-#     print len(learning.agent.modules["mod2"].sensorimotor_model.model.imodel.fmodel.dataset)
-#     print learning.agent.modules["mod1"].interest_model.current_interest
-    
-#     print
-#     print "Do 500 autonomous steps:" 
-#     for i in range(500):
-#         context = environment.get_current_context()
-#         m = learning.produce(context)
-#         s = environment.update(m)
-#         learning.perceive(s)
-    
-    print "Rebuilding agent from file"
-    learning.restart_from_file("../../../../../data/test.pickle", 2001)
-        
-#     print "Data after rebuilding"
-#     print learning.agent.t
-#     print learning.agent.interests_evolution["mod1"][-10:]
-#     print learning.agent.progresses_evolution["mod1"][-10:]
-#     print learning.agent.chosen_modules[-10:]
-#     print len(learning.agent.modules["mod1"].sensorimotor_model.model.imodel.fmodel.dataset)
-#     print len(learning.agent.modules["mod2"].sensorimotor_model.model.imodel.fmodel.dataset)
-#     print learning.agent.modules["mod1"].interest_model.current_interest
-    
-    print
-    print "Do 100 autonomous steps:" 
-    for i in range(100):
+    print()
+    print("Do 1000 autonomous steps:")
+    for i in tqdm(range(5000)):
         context = environment.get_current_context()
         m = learning.produce(context)
         s = environment.update(m)
@@ -92,11 +72,6 @@ if __name__ == "__main__":
         
 
     context = environment.get_current_context()
-    print "motor babbling", learning.motor_babbling()
-    print "motor_move_joystick_1", learning.produce(context, goal="joystick_1_forward")
-    print "motor_move_joystick_1 again", learning.produce(context, goal="joystick_1_forward")
-    print "motor_move_joystick_2", learning.produce(context, goal="joystick_2_forward")
-    print "motor_move_ergo", learning.produce(context, goal="ergo_right")
-        
-    print "\nPloting interests..."
+    print("motor babbling", learning.motor_babbling())
+    print("\nPloting interests...")
     learning.plot()
