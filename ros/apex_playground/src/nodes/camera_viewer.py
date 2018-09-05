@@ -3,7 +3,7 @@
 import rospy
 import matplotlib.pyplot as plt
 from rospkg import RosPack
-from apex_playground import Camera, CameraRequest
+from apex_playground.srv import Camera, CameraRequest
 import json
 from os.path import join
 

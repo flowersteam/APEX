@@ -16,7 +16,7 @@ class CameraService(object):
     def read(self, req):
         success, image = self.camera.read()
         if not success:
-            raise Execption("Failed to read camera...")
+            raise Exception("Failed to read camera...")
         return image
 
     def close(self):
