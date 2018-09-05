@@ -12,7 +12,7 @@ class CameraService(object):
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
 
-    def read(self):
+    def read(self, req):
         success, image = self.camera.read()
         if not success:
             raise Execption("Failed to read camera...")
