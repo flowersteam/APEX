@@ -24,6 +24,7 @@ class CameraService(object):
         cv2.destroyAllWindows()
 
 if __name__=="__main__":
+    rospy.init_node("camera")
     camera = CameraService(352, 288)
     rospy.Service("camera", Camera, camera.read)
     rospy.spin() 
