@@ -11,6 +11,7 @@ class CameraService(object):
         self.camera = cv2.VideoCapture(0)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
         self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
+        rospy.Service("camera", Camera, self.read)
 
     def read(self, req):
         success, image = self.camera.read()
@@ -26,5 +27,4 @@ class CameraService(object):
 if __name__=="__main__":
     rospy.init_node("camera")
     camera = CameraService(352, 288)
-    rospy.Service("camera", Camera, camera.read)
     rospy.spin() 
