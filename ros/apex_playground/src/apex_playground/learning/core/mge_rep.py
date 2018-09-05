@@ -36,8 +36,8 @@ class SupervisorRep(object):
         latents_ndims = 10  # Number of latent variables in representation
 
         self.m_space = list(range(m_ndims))
-        self.c_dims = list(range(m_ndims, m_ndims + 10))
-        self.s_latents = list(range(m_ndims + 10, m_ndims + 20))
+        self.c_dims = list(range(m_ndims, m_ndims + latents_ndims))
+        self.s_latents = list(range(m_ndims + latents_ndims, m_ndims + 2 * latents_ndims))
 
         self.s_spaces = dict(s_latents=self.s_latents)
 
@@ -70,8 +70,8 @@ class SupervisorRep(object):
                                                           context_n_dims=self.representation.n_latents // n_modules,
                                                           context_dims=list(c_mod),
                                                           context_sensory_bounds=[
-                                                              [-1.] * (self.representation.n_latents // n_modules),
-                                                              [1.] * (self.representation.n_latents // n_modules)]),
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
                                         explo_noise=self.explo_noise)
                 self.modules[module_id] = module
 
@@ -92,8 +92,8 @@ class SupervisorRep(object):
                                                           context_n_dims=self.representation.n_latents // n_modules,
                                                           context_dims=list(c_mod),
                                                           context_sensory_bounds=[
-                                                              [-1.] * (self.representation.n_latents // n_modules),
-                                                              [1.] * (self.representation.n_latents // n_modules)]),
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
                                         explo_noise=self.explo_noise)
                 self.modules[module_id] = module
 
@@ -254,6 +254,13 @@ class SupervisorRep(object):
         data_sum = data.sum(axis=1)
         data_sum[data_sum == 0.] = 1.
         return data / data_sum.reshape(data.shape[0], 1)
+
+    def get_unnormalized_interests_evolution(self):
+        if self.babbling_mode in ["MGEVAE", "MGEBVAE"]:
+            data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod0", "mod1", "mod2", "mod3", "mod4"]]))
+        if self.babbling_mode in ["RGEVAE", "RGEBVAE"]:
+            data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod0"]]))
+        return data
 
     def get_normalized_interests(self):
         interests = {}

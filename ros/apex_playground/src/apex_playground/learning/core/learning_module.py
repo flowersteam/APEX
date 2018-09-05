@@ -7,9 +7,8 @@ from explauto.utils import rand_bounds
 from explauto.utils.config import make_configuration
 from explauto.exceptions import ExplautoBootstrapError
 from explauto.sensorimotor_model.non_parametric import NonParametric
-from explauto.interest_model.competences import competence_dist
 
-from apex_playground.learning.core.interest_model import MiscRandomInterest, MiscGaussianInterest, MiscDiscretizedInterest, ContextRandomInterest, ContextGaussianInterest
+from apex_playground.learning.core.interest_model import MiscRandomInterest, MiscGaussianInterest, ContextRandomInterest, ContextGaussianInterest
 
 
 class LearningModule(Agent):
@@ -34,7 +33,6 @@ class LearningModule(Agent):
         if context_mode is not None:
             if interest_model == 'uniform':
                 im_cls, kwargs = (ContextRandomInterest, {
-                    'competence_measure': competence_dist,
                     'win_size': 50,
                     'competence_mode': 'knn',
                     'k': 20,
@@ -42,7 +40,6 @@ class LearningModule(Agent):
                     'context_mode': context_mode})
             elif interest_model == 'normal':
                 im_cls, kwargs = (ContextGaussianInterest, {
-                    'competence_measure': competence_dist,
                     'win_size': win_size,
                     'competence_mode': 'knn',
                     'k': 20,
@@ -51,25 +48,12 @@ class LearningModule(Agent):
         else:
             if interest_model == 'uniform':
                 im_cls, kwargs = (MiscRandomInterest, {
-                    'competence_measure': competence_dist,
                     'win_size': win_size,
                     'competence_mode': 'knn',
                     'k': 20,
                     'progress_mode': 'local'})
             elif interest_model == 'normal':
                 im_cls, kwargs = (MiscGaussianInterest, {
-                    'competence_measure': competence_dist,
-                    'win_size': win_size,
-                    'competence_mode': 'knn',
-                    'k': 20,
-                    'progress_mode': 'local'})
-            elif interest_model == 'active':
-                im_cls, kwargs = (MiscDiscretizedInterest, {
-                    'x_card': 20 ** len(self.im_dims),  # 20 is the number of cells on each dimension
-                    'cells_win_size': 20,  # window size parameter (ws)
-                    'eps_random': 0.1,  # proportion of random choice of cell
-                    'measure': competence_dist,
-                    'competence_measure': competence_dist,
                     'win_size': win_size,
                     'competence_mode': 'knn',
                     'k': 20,

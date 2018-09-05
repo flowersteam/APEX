@@ -6,8 +6,8 @@ import numpy as np
 import time
 import datetime
 
-from core.supervisor import Supervisor
-from core.flat_goal_babbling import FGB
+from apex_playground.learning.core.mge_fi import SupervisorFI
+from apex_playground.learning.core.flat_goal_babbling import FGB
 
 
 
@@ -93,54 +93,19 @@ class Learning(object):
     
     def start(self):
         if self.condition == "AMB":
-            self.agent = Supervisor(self.config, 
+            self.agent = SupervisorFI(self.config,
                                     babbling_mode="active",
                                     n_motor_babbling=self.n_motor_babbling, 
                                     explo_noise=self.explo_noise, 
                                     choice_eps=self.choice_eps,
                                     normalize_interests=self.normalize_interests)
-        elif self.condition == "AMBPROP":
-            self.agent = Supervisor(self.config, 
-                                    babbling_mode="prop",
-                                    n_motor_babbling=self.n_motor_babbling, 
-                                    explo_noise=self.explo_noise, 
-                                    choice_eps=self.choice_eps,
-                                    normalize_interests=self.normalize_interests)
-        elif self.condition == "AMBMIX":
-            self.agent = Supervisor(self.config, 
-                                    babbling_mode="activemix",
-                                    n_motor_babbling=self.n_motor_babbling, 
-                                    explo_noise=self.explo_noise, 
-                                    choice_eps=self.choice_eps,
-                                    normalize_interests=self.normalize_interests)
-        elif self.condition == "RMB":
-            self.agent = Supervisor(self.config, 
-                                    babbling_mode="random",
-                                    n_motor_babbling=self.n_motor_babbling, 
-                                    explo_noise=self.explo_noise, 
-                                    choice_eps=self.choice_eps,
-                                    normalize_interests=self.normalize_interests)
         elif self.condition == "RmB":
-            self.agent = Supervisor(self.config, 
+            self.agent = SupervisorFI(self.config,
                                     n_motor_babbling=1.)
         elif self.condition == "FGB":
             self.agent = FGB(self.config,
                                 n_motor_babbling=self.n_motor_babbling, 
                                 explo_noise=self.explo_noise)
-        elif self.condition == "FC":
-            self.agent = Supervisor(self.config, 
-                                    babbling_mode="FC",
-                                    n_motor_babbling=self.n_motor_babbling, 
-                                    explo_noise=self.explo_noise, 
-                                    choice_eps=self.choice_eps,
-                                    normalize_interests=self.normalize_interests)
-        elif self.condition == "OS":
-            self.agent = Supervisor(self.config, 
-                                    babbling_mode="OS",
-                                    n_motor_babbling=self.n_motor_babbling, 
-                                    explo_noise=self.explo_noise, 
-                                    choice_eps=self.choice_eps,
-                                    normalize_interests=self.normalize_interests)
         else:
             raise NotImplementedError
     
@@ -159,4 +124,4 @@ class Learning(object):
         ax.set_xlabel('Time steps', fontsize=20)
         ax.set_ylabel('Learning progress', fontsize=20)
         plt.show(block=True)
-        
+

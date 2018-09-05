@@ -7,25 +7,27 @@ from mugllearning import Learning
 
         
 if __name__ == "__main__":
-    
+
+    render = True
     print("Create environment")
     environment = TestArmBallEnv()
-    environment = TestArmBallsObsEnv()
+    environment = TestArmBallsObsEnv(render=render)
     
     print("Create agent")
     learning = Learning(dict(m_mins=environment.conf.m_mins,
                              m_maxs=environment.conf.m_maxs,
                              s_mins=environment.conf.s_mins,
                              s_maxs=environment.conf.s_maxs),
-                        condition="MGEVAE", explo_noise=0.01, choice_eps=0.1)
+                        condition="MGEBVAE", explo_noise=0.01, choice_eps=0.1)
     learning.start()
-    
+
     print()
     print("Do 100 autonomous steps:") 
     for i in range(100):
+        environment.reset()
         context = environment.get_current_context()
         m = learning.produce(context)
-        s = environment.update(m)
+        s = environment.update(m, reset=False)
         learning.perceive(s)
         learning.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
     
@@ -45,13 +47,14 @@ if __name__ == "__main__":
     print()
     print("Do 150 autonomous steps:")
     for i in range(150):
+        environment.reset()
         context = environment.get_current_context()
         m = learning.produce(context)
-        s = environment.update(m)
+        s = environment.update(m, reset=False)
         learning.perceive(s)
     
     print("Rebuilding agent from file")
-    learning.restart_from_files(experiment_name="test", task="mge_fi", trial=0, iteration=101, folder="../../../../../data/test")
+    learning.restart_from_files(experiment_name="test", task="mge_fi", trial=0, iteration=100, folder="../../../../../data/test")
         
     print("Data after rebuilding")
     print(learning.agent.t)
@@ -64,13 +67,14 @@ if __name__ == "__main__":
     
     print()
     print("Do 1000 autonomous steps:")
-    for i in tqdm(range(5000)):
+    for i in tqdm(range(10000)):
+        environment.reset()
         context = environment.get_current_context()
         m = learning.produce(context)
-        s = environment.update(m)
+        s = environment.update(m, reset=False)
         learning.perceive(s)
-        
 
+    environment.reset()
     context = environment.get_current_context()
     print("motor babbling", learning.motor_babbling())
     print("\nPloting interests...")

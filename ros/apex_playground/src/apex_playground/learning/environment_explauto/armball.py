@@ -75,7 +75,7 @@ class ArmBall(object):
 
     def __init__(self, *args, object_initial_pose=np.array([0.6, 0.6]),
                  object_rewarding_pose=np.array([-0.6, -0.6]),
-                 arm_lengths=np.array([0.3, 0.2, 0.2, 0.1, 0.1, 0.05, 0.05]), object_size=0.1, **kwargs):
+                 arm_lengths=np.array([0.3, 0.2, 0.2, 0.1, 0.1, 0.05, 0.05]), object_size=0.1, stochastic=False, **kwargs):
 
         assert arm_lengths.size < 8, "The number of joints must be inferior to 8"
         assert arm_lengths.sum() == 1., "The arm length must sum to 1."
@@ -83,6 +83,7 @@ class ArmBall(object):
         # We set the parameters
         self._n_joints = arm_lengths.size
         self._arm_lengths = arm_lengths
+        self._stochastic = stochastic
         self._object_initial_pose = object_initial_pose
         self._object_rewarding_pose = object_rewarding_pose
         self._object_size = object_size
@@ -103,6 +104,8 @@ class ArmBall(object):
     def reset(self):
 
         # We reset the simulation
+        if self._stochastic:
+            self._object_initial_pose = np.random.uniform(-0.9, 0.9, 2)
         self._actual_object_pose = self._object_initial_pose
         self._actual_arm_pose = np.zeros(self._arm_lengths.shape)
         self._object_handled = False

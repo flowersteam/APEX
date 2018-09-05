@@ -1,9 +1,49 @@
 import numpy as np
 import gizeh
+import matplotlib.pyplot as plt
 
 from explauto.utils import bounds_min_max
 from explauto.environment.environment import Environment
 from explauto.environment.context_environment import ContextEnvironment
+
+
+class MatplotlibInteractiveRendering(object):
+    """Check you used the `%matplotlib notebook` magic
+    """
+
+    def __init__(self, renderer, *args, width=600, height=400, figsize=(5, 5), **kwargs):
+        self._renderer = renderer(width=width, height=height, **kwargs)
+        self._width = width
+        self._height = height
+        self._figsize = figsize
+
+        self._fig = None
+        self._ax = None
+        self._imsh = None
+        self.viewer = None
+
+    def reset(self):
+        self._renderer.reset()
+
+    def _start_viewer(self):
+        plt.ion()
+        self.viewer = plt.figure()
+        self._ax = self.viewer.add_subplot(111)
+
+    def act(self, **kwargs):
+        if self.viewer is None:
+            self._start_viewer()
+            # Retrieve image of corresponding to observation
+            self._renderer.act(**kwargs)
+            img = self._renderer.rendering
+            self._img_artist = self._ax.imshow(img)
+        else:
+            # Retrieve image of corresponding to observation
+            self._renderer.act(**kwargs)
+            img = self._renderer.rendering
+            self._img_artist.set_data(img)
+            plt.draw()
+            plt.pause(0.01)
 
 
 class RbfController(object):
@@ -108,7 +148,7 @@ class ArmBalls(object):
 
         # We reset the simulation
         if self._stochastic:
-            self._object_initial_pose = np.random.uniform(-0.9, 0.9, 2)
+            self._object_initial_pose = np.random.uniform(-0.8, 0.8, 2)
         self._actual_object_pose = self._object_initial_pose.copy()
         self._actual_distract_pose = self._distract_initial_pose.copy()
         self._actual_arm_pose = np.zeros(self._arm_lengths.shape)
@@ -368,7 +408,7 @@ class MyArmBallsObserved(object):
 
     def __init__(self, arm_lengths=np.array([0.3, 0.2, 0.2, 0.1, 0.1, 0.05, 0.05]),
                  object_size=0.2, distract_size=0.15, distract_noise=0.1,
-                 n_rbf=5, sdev=5., n_timesteps=150, env_noise=0, render=False, render_interval=1,
+                 n_rbf=5, sdev=5., n_timesteps=50, env_noise=0, render=False, render_interval=1,
                  rgb=True, render_arm=False, distract_first=False, **kwargs):
 
         self._arm_lengths = arm_lengths
@@ -492,7 +532,7 @@ class TestArmBallsEnv(ContextEnvironment):
 
 
 class TestNCArmBallsObsEnv(Environment):
-    def __init__(self, m_mins, m_maxs, s_mins, s_maxs):
+    def __init__(self, m_mins, m_maxs, s_mins, s_maxs, render=False, render_interval=100):
 
         Environment.__init__(self, m_mins, m_maxs, s_mins, s_maxs)
 
@@ -500,8 +540,9 @@ class TestNCArmBallsObsEnv(Environment):
         # self.hand = 30 * [0.]
 
         # Env
+        self.render = render
         self.env = MyArmBallsObserved(arm_lengths=np.array([0.5, 0.3, 0.2]), object_size=0.1, n_rbf=5,
-                                      width=64, height=64)
+                                      width=64, height=64, stochastic=True, render=render, render_interval=render_interval)
         self.env.reset()
 
         # COMPUTE PERCEPTION
@@ -513,31 +554,41 @@ class TestNCArmBallsObsEnv(Environment):
     def compute_motor_command(self, m):
         return bounds_min_max(m, self.conf.m_mins, self.conf.m_maxs)
 
-    def compute_sensori_effect(self, m):
-
-        # SAMPLE DMP
+    def reset(self):
         self.env.reset()
-        self.env.act(m, render=False)
 
         # COMPUTE PERCEPTION
         self.image = self.env.observation
 
+        # CONTEXT
+        self.current_context = self.env.observation
+
+    def compute_sensori_effect(self, m):
+        # SAMPLE DMP
+        self.env.act(m, render=self.render)
+
+        # COMPUTE PERCEPTION
+        self.image = self.env.observation
+
+        # CONTEXT
         self.current_context = self.env.observation
 
         return self.current_context
 
 
 class TestArmBallsObsEnv(ContextEnvironment):
-    def __init__(self):
+    def __init__(self, render=False):
         env_cls = TestNCArmBallsObsEnv
         env_conf = dict(m_mins=[-1.] * 3 * 5,
                         m_maxs=[1.] * 3 * 5,
-                        s_mins=[-1.] * 10,
-                        s_maxs=[1.] * 10)
+                        s_mins=[-2.5] * 10,
+                        s_maxs=[2.5] * 10,
+                        render=render,
+                        render_interval=100)
 
         context_mode = dict(mode='mcs',
                             context_n_dims=10,
-                            context_sensory_bounds=[[-1.] * 10, [1.] * 10])
+                            context_sensory_bounds=[[-2.5] * 10, [2.5] * 10])
 
         ContextEnvironment.__init__(self, env_cls, env_conf, context_mode)
 
@@ -545,7 +596,8 @@ class TestArmBallsObsEnv(ContextEnvironment):
 
 
 if __name__ == '__main__':
-    a = MyArmBallsObserved()
-    a.reset()
-    random_action = np.random.uniform(-1, 1, a.action_space.shape[0])
-    a.act(random_action, render=False)
+    a = MyArmBallsObserved(stochastic=True, render=True)
+    for _ in range(10):
+        a.reset()
+        random_action = np.random.uniform(-1, 1, a.action_space.shape[0])
+        a.act(random_action, render=True)

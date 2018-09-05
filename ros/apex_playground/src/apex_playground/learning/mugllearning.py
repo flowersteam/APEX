@@ -34,6 +34,9 @@ class Learning(object):
 
     def get_normalized_interests_evolution(self): return self.agent.get_normalized_interests_evolution()
 
+    def get_unnormalized_interests_evolution(self):
+        return self.agent.get_unnormalized_interests_evolution()
+
     def get_last_focus(self): return self.agent.get_last_focus()
 
     def get_space_names(self): return self.agent.get_space_names()
@@ -94,7 +97,7 @@ class Learning(object):
 
     def plot(self):
         fig, ax = plt.subplots()
-        ax.plot(self.get_normalized_interests_evolution(), lw=2)
+        ax.plot(self.get_unnormalized_interests_evolution(), lw=2)
         if self.condition in ["MGEFI", "RGEFI"]:
             ax.legend(["Arm", "Ball"], ncol=3)
         if self.condition in ["MGEVAE", "MGEBVAE"]:
