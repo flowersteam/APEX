@@ -63,6 +63,7 @@ add_message_files(
 add_service_files(
   FILES
   ExecuteErgoTrajectory.srv
+  Camera.srv
   GetSensorialState.srv  
   GetInterests.srv
   Produce.srv
