@@ -1,12 +1,14 @@
 #!/usr/bin/python
 
 import rospy
+import matplotlib
+matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 from rospkg import RosPack
 from apex_playground.srv import Camera, CameraRequest
 import json
 from os.path import join
-
+import numpy as np
 
 
 class CameraViewer(object):
@@ -17,10 +19,11 @@ class CameraViewer(object):
         print(self.params)
         
     def show_image(self):
-        rospy.wait_for_service('/{}/camera'.format(self.params['robot_name']))
-        read = rospy.ServiceProxy('/{}/camera'.format(self.params['robot_name']), Camera)
-        image = read(CameraRequest())
-        plt.imshow(image)
+        rospy.wait_for_service('/apex_1/camera')
+        read = rospy.ServiceProxy('/apex_1/camera', Camera)
+        image = [x.data for x in read(CameraRequest()).image]
+        image = np.array(image).reshape(144,176,3)
+	plt.imshow(image)
         plt.show()
 
 if __name__ == "__main__":
