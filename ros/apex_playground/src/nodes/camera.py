@@ -8,12 +8,13 @@ from std_msgs.msg import Float32
 from threading import Thread, Lock
 import time
 
+
 class CameraService(object):
 
     def __init__(self, height, width):
         camera = cv2.VideoCapture(0)
         camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
-	    camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
+        camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
         camera.set(cv2.cv.CV_CAP_PROP_FPS, 30)
         self.frame = np.zeros(1)
         self.frame_lock = Lock()
@@ -21,7 +22,7 @@ class CameraService(object):
         self.exit_lock = Lock()
         self.thread = Thread(target=self.__in_thread_loop, args=(camera,))
         self.thread.start()
-	    rospy.Service("camera", Camera, self.read)
+        rospy.Service("camera", Camera, self.read)
 
     def __in_thread_loop(self, camera):
         while True:
@@ -50,6 +51,7 @@ class CameraService(object):
         with self.exit_lock:
             self.exit = True
         self.thread.join()
+
 
 if __name__=="__main__":
     rospy.init_node("camera")

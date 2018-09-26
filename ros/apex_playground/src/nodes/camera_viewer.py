@@ -22,7 +22,7 @@ class CameraViewer(object):
         read = rospy.ServiceProxy('/{}/camera'.format(self.apex_name), Camera)
         image = [x.data for x in read(CameraRequest()).image]
         image = np.array(image).reshape(144,176,3)
-	    plt.imshow(image)
+        plt.imshow(image)
         plt.show()
 
 if __name__ == "__main__":
