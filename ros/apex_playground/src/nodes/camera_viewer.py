@@ -15,7 +15,8 @@ import numpy as np
 class CameraViewer(object):
     def __init__(self):
         self.rospack = RosPack()
-        self.apex_name = os.environ.get("ROS_HOSTNAME").replace("-ergo.local", "");
+        self.apex_name = os.environ.get("ROS_HOSTNAME").replace("-ergo.local", "").replace("-", "_");
+        print("CameraViewer on {}", self.apex_name)
         
     def show_image(self):
         rospy.wait_for_service('/{}/camera'.format(self.apex_name))
