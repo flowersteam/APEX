@@ -16,7 +16,7 @@ class ErgoMover(object):
     def move_to(self, point):
         rospy.wait_for_service('/{}/poppy_ergo_jr/reach'.format(self.apex_name))
         reach = rospy.ServiceProxy('/{}/poppy_ergo_jr/reach'.format(self.apex_name), ReachTarget)
-        reach_jointstate = JointState(position=point)
+        reach_jointstate = JointState(position=point, name=["m{}".format(i) for i ni range(1,7)])
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(5))
         reach(reach_request)
