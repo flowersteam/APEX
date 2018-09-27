@@ -25,9 +25,8 @@ if __name__ == "__main__":
     mover = ErgoMover()
     while True:
         point = input("Enter a point to reach (e.g. : 5,5,5,5,5,5): \n")
-        point = point.split(",")
         if not len(point) == 6:
             print("You must enter 6 motor values like '4,4,4,4,4,4,4'")
             continue
         else:
-            mover.move_to(point)
+            mover.move_to(list(point))
