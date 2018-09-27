@@ -31,4 +31,3 @@ if __name__ == "__main__":
             continue
         else:
             mover.move_to(list(point))
-            rospy.sleep(6)
