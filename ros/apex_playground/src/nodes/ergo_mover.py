@@ -14,11 +14,11 @@ class ErgoMover(object):
         self.apex_name = os.environ.get("ROS_HOSTNAME").replace("-ergo.local", "").replace("-", "_");
          
     def move_to(self, point):
-        rospy.wait_for_service('/{}/poppy_ergo_jr/poppy_ergo_jr_controllers'.format(self.apex_name))
-        reach = rospy.ServiceProxy('/{}/poppy_ergo_jr/poppy_ergo_jr_controllers'.format(self.apex_name), ReachTarget)
+        rospy.wait_for_service('/{}/poppy_ergo_jr/reach'.format(self.apex_name))
+        reach = rospy.ServiceProxy('/{}/poppy_ergo_jr/reach'.format(self.apex_name), ReachTarget)
         reach_jointstate = JointState(position=point)
         reach_request = ReachTargetRequest(target=reach_jointstate,
-                                           duration=ropsy.Duration(5))
+                                           duration=rospy.Duration(5))
         reach(reach_request)
 
 if __name__ == "__main__":
@@ -30,3 +30,4 @@ if __name__ == "__main__":
             continue
         else:
             mover.move_to(list(point))
+            rospy.sleep(6)
