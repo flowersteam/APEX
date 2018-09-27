@@ -5,6 +5,7 @@ from poppy_msgs.srv import ReachTarget, ReachTargetRequest
 from sensor_msgs.msg import JointState
 import os
 import numpy as np
+from explauto.utils import bounds_min_max
 
 from apex_playground.learning.dmp.mydmp import MyDMP
 
@@ -28,15 +29,16 @@ if __name__ == "__main__":
     n_bfs = 7
     timesteps = 30
     max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
+    bounds_motors_max = 20 * np.ones(6)
+    bounds_motors_min = -20 * np.ones(6)
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
 
     mover = ErgoDMP()
-
-    m = np.random.randn(dmp.motor_dmp.n_dmps * dmp.motor_dmp.n_bfs + 4)
-
     point = [0, 0, 0, 0, 0, 0]
-    mover.move_to(list(m))
-    m = np.random.randn(dmp.motor_dmp.n_dmps * dmp.motor_dmp.n_bfs + 4)
-    traj = dmp.motor_dmp.trajectory(m)
+    mover.move_to(list(point))
+    m = np.random.randn(dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
+    normalized_traj = dmp.trajectory(m)
+    normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
+    traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (bounds_motors_max - bounds_motors_min) + bounds_motors_min
     for m in traj:
         mover.move_to(list(m))
