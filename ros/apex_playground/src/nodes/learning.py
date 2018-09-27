@@ -170,7 +170,6 @@ class LearningNode(object):
             rospy.loginfo("Learning node is perceiving sensory + torso trajectories for an arm demo")
             success = self.learning.perceive(s, m_demo=torso_traj_w)
         elif request.demo.type_demo == Demonstration.TYPE_DEMO_JOYSTICK:
-
             rospy.loginfo("Learning node is perceiving sensory + torso trajectories for a joystick demo")
             success = self.learning.perceive(s, j_demo=True)
         else:
@@ -187,7 +186,7 @@ class LearningNode(object):
 
         if set_iteration > -1:
             rospy.logwarn("Applying time travel to iteration {}".format(set_iteration))
-            #self.learning.restart_from_files(experiment_name, set_iteration)
+            # self.learning.restart_from_files(experiment_name, set_iteration)
 
         # And save the current iteration
         experiment_name = rospy.get_param('/experiment/name')
@@ -221,6 +220,7 @@ class LearningNode(object):
 
         response = ProduceResponse(torso_trajectory=trajectory_msg)
         return response
+
 
 if __name__ == '__main__':
     rospy.init_node('learning')

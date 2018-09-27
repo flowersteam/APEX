@@ -22,6 +22,7 @@ class ErgoDMP(object):
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(duration))
         reach(reach_request)
+        rospy.sleep(duration)
 
 
 if __name__ == "__main__":

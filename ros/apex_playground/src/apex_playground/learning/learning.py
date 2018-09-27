@@ -10,8 +10,6 @@ from apex_playground.learning.core.mge_fi import SupervisorFI
 from apex_playground.learning.core.flat_goal_babbling import FGB
 
 
-
-
 class Learning(object):
     def __init__(self, config, condition="AMB", n_motor_babbling=0.1, explo_noise=0.05, choice_eps=0.2, enable_hand=True, normalize_interests=True):
         self.config = config
@@ -89,23 +87,22 @@ class Learning(object):
                 return False
         else:
             return False
-            
-    
+
     def start(self):
         if self.condition == "AMB":
             self.agent = SupervisorFI(self.config,
-                                    babbling_mode="active",
-                                    n_motor_babbling=self.n_motor_babbling, 
-                                    explo_noise=self.explo_noise, 
-                                    choice_eps=self.choice_eps,
-                                    normalize_interests=self.normalize_interests)
+                                      babbling_mode="active",
+                                      n_motor_babbling=self.n_motor_babbling,
+                                      explo_noise=self.explo_noise,
+                                      choice_eps=self.choice_eps,
+                                      normalize_interests=self.normalize_interests)
         elif self.condition == "RmB":
             self.agent = SupervisorFI(self.config,
-                                    n_motor_babbling=1.)
+                                      n_motor_babbling=1.)
         elif self.condition == "FGB":
             self.agent = FGB(self.config,
-                                n_motor_babbling=self.n_motor_babbling, 
-                                explo_noise=self.explo_noise)
+                             n_motor_babbling=self.n_motor_babbling,
+                             explo_noise=self.explo_noise)
         else:
             raise NotImplementedError
     

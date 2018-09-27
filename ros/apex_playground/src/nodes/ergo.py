@@ -187,6 +187,7 @@ class Ergo(object):
         self.go_to_start(request.slow)
         return ResetResponse()
 
+
 if __name__ == '__main__':
     rospy.init_node('ergo')
     Ergo().run()

@@ -21,7 +21,7 @@ class Learning(object):
         self.agent = None
         
     def produce(self, context):
-        # context is the rotation of the ergo and the ball: "context = environment.get_current_context()"
+        # context is the image of the scene before action: "context = environment.get_current_context()"
         return self.agent.produce(context)
             
     def perceive(self, s):
@@ -77,10 +77,10 @@ class Learning(object):
                                       choice_eps=self.choice_eps)
         if self.condition in ["MGEVAE", "RGEVAE", "MGEBVAE", "RGEBVAE"]:
             self.agent = SupervisorRep(self.config,
-                                      babbling_mode=self.condition,
-                                      n_motor_babbling=self.n_motor_babbling,
-                                      explo_noise=self.explo_noise,
-                                      choice_eps=self.choice_eps)
+                                       babbling_mode=self.condition,
+                                       n_motor_babbling=self.n_motor_babbling,
+                                       explo_noise=self.explo_noise,
+                                       choice_eps=self.choice_eps)
         elif self.condition == "RmB":
             self.agent = SupervisorFI(self.config,
                                       n_motor_babbling=1.)

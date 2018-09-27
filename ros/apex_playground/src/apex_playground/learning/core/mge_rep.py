@@ -75,11 +75,55 @@ class SupervisorRep(object):
                                         explo_noise=self.explo_noise)
                 self.modules[module_id] = module
 
+        elif self.babbling_mode == "RGEVAE":
+            self.representation = ArmBallsVAE
+            self.representation.sorted_latents = np.array([9, 4, 0, 3, 7, 6, 2, 1, 5, 8])
+            # Create one module per with all the latents
+            n_modules = 1
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
+
         elif self.babbling_mode == "MGEBVAE":
             self.representation = ArmBallsBetaVAE
             self.representation.sorted_latents = np.array([9, 4, 1, 7, 6, 8, 2, 3, 0, 5])
             # Create one module per two latents
             n_modules = 5
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
+
+        elif self.babbling_mode == "RGEBVAE":
+            self.representation = ArmBallsBetaVAE
+            self.representation.sorted_latents = np.array([9, 4, 1, 7, 6, 8, 2, 3, 0, 5])
+            # Create one module with all the latents
+            n_modules = 1
             for i in range(n_modules):
                 module_id = "mod" + str(i)
                 c_mod = self.representation.sorted_latents[

@@ -47,7 +47,9 @@ class EnvironmentTranslator(object):
         return self.motor_dmp.imitate(normalized_traj) / self.max_params
 
     def w_to_trajectory(self, w):
-        normalized_traj = bounds_min_max(self.motor_dmp.trajectory(np.array(w) * self.max_params), self.n_dmps * [-1.], self.n_dmps * [1.])
+        normalized_traj = bounds_min_max(self.motor_dmp.trajectory(np.array(w) * self.max_params),
+                                         self.n_dmps * [-1.],
+                                         self.n_dmps * [1.])
         return ((normalized_traj - np.array([-1.]*self.n_dmps))/2.) * (self.bounds_motors_max - self.bounds_motors_min) + self.bounds_motors_min
 
     def get_context(self, state):

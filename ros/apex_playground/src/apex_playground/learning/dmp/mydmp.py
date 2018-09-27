@@ -1,9 +1,8 @@
 import numpy as np
 from copy import copy
 
-from dmp_discrete import DMPs_discrete
+from .dmp_discrete import DMPs_discrete
 from scipy.optimize import fmin_l_bfgs_b
-
 
 
 class MyDMP(object):
@@ -20,7 +19,6 @@ class MyDMP(object):
         self.motor = copy(self.default)
         
         self.dmp = DMPs_discrete(dmps=self.n_dmps, bfs=self.n_bfs, dt=1./self.timesteps)
-        
 
     def trajectory(self, m):
         """
