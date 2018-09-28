@@ -14,7 +14,7 @@ class ErgoDMP(object):
     def __init__(self):
         self.apex_name = os.environ.get("ROS_HOSTNAME").replace("-ergo.local", "").replace("-", "_");
 
-    def move_to(self, point, duration=0.1):
+    def move_to(self, point, duration=0.4):
         service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
         rospy.wait_for_service(service)
         reach = rospy.ServiceProxy(service, ReachTarget)
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     timesteps = 30
     max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
     bounds_motors_max = np.array([180, 10, 20, 10, 30, 30])
-    bounds_motors_min = np.array([-180, -50, -50, -15, -50, -50])
+    bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
 
     mover = ErgoDMP()
