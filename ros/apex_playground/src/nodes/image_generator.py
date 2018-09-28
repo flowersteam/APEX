@@ -32,7 +32,7 @@ class ErgoDMP(object):
     def __init__(self, n_apex):
         self.apex_name = "apex_{}".format(n_apex)
 
-    def move_to(self, point, duration=0.4):
+    def move_to(self, point, duration=0.2):
         service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
         rospy.wait_for_service(service)
         reach = rospy.ServiceProxy(service, ReachTarget)
