@@ -16,7 +16,6 @@ from apex_playground.learning.dmp.mydmp import MyDMP
 
 class CameraRecorder(object):
     def __init__(self, n_apex):
-        self.rospack = RosPack()
         self.apex_name = "apex_{}".format(n_apex)
         print("CameraRecorder on ", self.apex_name)
 
