@@ -44,9 +44,9 @@ class ErgoDMP(object):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Save images of the arena.')
-    parser.add_argument('path', metavar='p', type=str, help='path to save images')
-    parser.add_argument('apex', metavar='a', type=int, help='ergo number')
-    parser.add_argument('n-iter', metavar='n', type=int, help='number of images to take')
+    parser.add_argument('--path', metavar='-p', type=str, help='path to save images')
+    parser.add_argument('--apex', metavar='-a', type=int, help='ergo number')
+    parser.add_argument('--n-iter', metavar='-n', type=int, help='number of images to take')
     args = parser.parse_args()
     camera = CameraRecorder(args.apex)
 
