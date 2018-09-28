@@ -71,4 +71,4 @@ if __name__ == "__main__":
             mover.move_to(list(m))
         image = camera.get_image()
         filename = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
-        imageio.imwrite(os.path.join(args.path, filename), image)
+        imageio.imwrite(os.path.join(args.path, filename) + '.jpeg', image)
