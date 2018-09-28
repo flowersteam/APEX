@@ -27,8 +27,8 @@ class CameraRecorder(object):
 
 
 class ErgoDMP(object):
-    def __init__(self):
-        self.apex_name = os.environ.get("ROS_HOSTNAME").replace("-ergo.local", "").replace("-", "_")
+    def __init__(self, n_apex):
+        self.apex_name = "apex_{}".format(n_apex)
 
     def move_to(self, point, duration=0.4):
         service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
@@ -48,6 +48,7 @@ if __name__ == "__main__":
     parser.add_argument('--n-iter', metavar='-n', type=int, help='number of images to take')
     args = parser.parse_args()
     camera = CameraRecorder(args.apex)
+    mover = ErgoDMP(args.apex)
 
     n_dmps = 6
     n_bfs = 7
@@ -56,7 +57,6 @@ if __name__ == "__main__":
     bounds_motors_max = np.array([180, 10, 20, 10, 30, 30])
     bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
-    mover = ErgoDMP()
 
     for _ in args.n_iter:
         point = [0, 0, 0, 0, 0, 0]
