@@ -5,6 +5,7 @@ import string
 import argparse
 import rospy
 from poppy_msgs.srv import ReachTarget, ReachTargetRequest
+from apex_playground.srv import Camera, CameraRequest
 from sensor_msgs.msg import JointState
 import os
 import numpy as np
