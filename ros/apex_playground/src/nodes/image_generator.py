@@ -76,6 +76,6 @@ if __name__ == "__main__":
         traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (bounds_motors_max - bounds_motors_min) + bounds_motors_min
         for m in traj:
             mover.move_to(list(m))
-        image = camera.get_image()
+        image = np.flip(camera.get_image(), axis=2)
         filename = '{}-{}'.format(args.apex, datetime.datetime.now())
         scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)

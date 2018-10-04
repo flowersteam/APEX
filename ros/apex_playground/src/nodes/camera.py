@@ -43,7 +43,7 @@ class CameraService(object):
     def read(self, req):
         with self.frame_lock:
             image = self.frame.copy()
-        resp = np.flip(CameraResponse(), axis=2)
+        resp = CameraResponse()
         resp.image = [Float32(p) for p in image.astype(np.float32).flatten()]
         return resp
 
