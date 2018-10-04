@@ -33,10 +33,10 @@ class ErgoDMP(object):
         self._apex_name = "apex_{}".format(n_apex)
         self._reach_service_name = '/{}/poppy_ergo_jr/reach'.format(self._apex_name)
         rospy.wait_for_service(self._reach_service_name)
-        self._reach_service_prox = rospy.ServiceProxy(service, ReachTarget)
+        self._reach_service_prox = rospy.ServiceProxy(self._reach_service_name, ReachTarget)
         self._compliant_service_name = '/{}/poppy_ergo_jr/set_compliant'.format(self._apex_name)
         rospy.wait_for_service(self._compliant_service_name)
-        self._compliant_service_prox = rospy.ServiceProxy(service, SetCompliant)
+        self._compliant_service_prox = rospy.ServiceProxy(self._compliant_service_name, SetCompliant)
 
     def set_compliant(self, compliant):
         self._compliant_service_prox(SetCompliantRequest(compliant=compliant))
