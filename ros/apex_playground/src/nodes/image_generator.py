@@ -11,6 +11,7 @@ import os
 import numpy as np
 from explauto.utils import bounds_min_max
 import scipy.misc
+import datetime
 
 from apex_playground.learning.dmp.mydmp import MyDMP
 
@@ -27,7 +28,7 @@ class CameraRecorder(object):
         image = np.array(image).reshape(144, 176, 3)
         return image
 
-
+https://docs.scipy.org/doc/scipy-0.18.1/reference/generated/scipy.misc.imsave.html
 class ErgoDMP(object):
     def __init__(self, n_apex):
         self._apex_name = "apex_{}".format(n_apex)
@@ -46,7 +47,7 @@ class ErgoDMP(object):
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(duration))
         self._reach_service_prox(reach_request)
-        rospy.sleep(duration)
+        rospy.sleep(duration-0.05)
 
 
 if __name__ == "__main__":
@@ -77,5 +78,5 @@ if __name__ == "__main__":
         for m in traj:
             mover.move_to(list(m))
         image = camera.get_image()
-        filename = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
+        filename = '{}-{}'.format(args.apex, datetime.datetime.now())
         scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
