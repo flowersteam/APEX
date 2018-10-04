@@ -4,7 +4,7 @@ import random
 import string
 import argparse
 import rospy
-from poppy_msgs.srv import ReachTarget, ReachTargetRequest
+from poppy_msgs.srv import ReachTarget, ReachTargetRequest, SetCompliant, SetCompliantRequest
 from apex_playground.srv import Camera, CameraRequest
 from sensor_msgs.msg import JointState
 import os
@@ -30,16 +30,22 @@ class CameraRecorder(object):
 
 class ErgoDMP(object):
     def __init__(self, n_apex):
-        self.apex_name = "apex_{}".format(n_apex)
+        self._apex_name = "apex_{}".format(n_apex)
+        self._reach_service_name = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
+        rospy.wait_for_service(self._reach_service_name)
+        self._reach_service_prox = rospy.ServiceProxy(service, ReachTarget)
+        self._compliant_service_name = '/{}/poppy_ergo_jr/set_compliant'.format(self._apex_name)
+        rospy.wait_for_service(self._compliant_service_name)
+        self._compliant_service_prox = rospy.ServiceProxy(service, SetCompliant)
+
+    def set_compliant(self, compliant):
+        self._compliant_service_prox(SetCompliantRequest(compliant=compliant))
 
     def move_to(self, point, duration=0.2):
-        service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
-        rospy.wait_for_service(service)
-        reach = rospy.ServiceProxy(service, ReachTarget)
         reach_jointstate = JointState(position=point, name=["m{}".format(i) for i in range(1, 7)])
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(duration))
-        reach(reach_request)
+        self._reach_service_pro(reach_request)
         rospy.sleep(duration)
 
 
@@ -51,6 +57,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     camera = CameraRecorder(args.apex)
     mover = ErgoDMP(args.apex)
+    mover.set_compliant(False)
 
     n_dmps = 6
     n_bfs = 7
