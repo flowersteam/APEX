@@ -10,7 +10,7 @@ from sensor_msgs.msg import JointState
 import os
 import numpy as np
 from explauto.utils import bounds_min_max
-import imageio
+import scipy.misc
 
 from apex_playground.learning.dmp.mydmp import MyDMP
 
@@ -78,4 +78,4 @@ if __name__ == "__main__":
             mover.move_to(list(m))
         image = camera.get_image()
         filename = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(32)])
-        imageio.imwrite(os.path.join(args.path, filename) + '.jpeg', image)
+        scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
