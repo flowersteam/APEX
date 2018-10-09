@@ -54,8 +54,8 @@ if __name__ == "__main__":
     n_bfs = 7
     timesteps = 30
     max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
-    bounds_motors_max = np.array([180, 10, 20, 10, 30, 30])
-    bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
+    bounds_motors_max = np.array([180, 0, 40, 70, 20, 70])
+    bounds_motors_min = np.array([-180, 0, 0, -70, 0, 0])
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
 
     for _ in args.n_iter:
