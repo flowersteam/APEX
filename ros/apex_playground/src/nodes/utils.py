@@ -243,7 +243,7 @@ class CameraRecorder(object):
         read = rospy.ServiceProxy('/{}/camera'.format(self.apex_name), Camera)
         image = [x.data for x in read(CameraRequest()).image]
         image = np.array(image).reshape(144, 176, 3)
-        return image
+        # return image
         return np.flip(image, axis=2)
 
 
