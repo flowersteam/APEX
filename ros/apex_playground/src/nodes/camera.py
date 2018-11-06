@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from collections import deque
 import numpy as np
 import cv2
 import rospy
@@ -14,7 +13,10 @@ class CameraService(object):
     def __init__(self, height, width):
         camera = cv2.VideoCapture(0)
         camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
-        camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
+        test = camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
+        if not test:
+            rospy.logerr("Cannot open the webcam, exiting")
+            return
         camera.set(cv2.cv.CV_CAP_PROP_FPS, 30)
         self.frame = np.zeros(1)
         self.frame_lock = Lock()
@@ -26,14 +28,26 @@ class CameraService(object):
 
     def __in_thread_loop(self, camera):
         while True:
-            time.sleep(1/20)
+            with self.exit_lock:
+                do_exit = self.exit
+            success, frame = camera.read()
+            if do_exit:
+                camera.release()
+                break
+            if not success:
+                rospy.logerr("Frame acquire failed")
+                continue
+            else:
+                with self.frame_lock:
+                    self.frame = frame
+                time.sleep(1/20)
 
     def read(self, req):
         with self.frame_lock:
             image = self.frame.copy()
         resp = CameraResponse()
         resp.image = [Float32(p) for p in image.astype(np.float32).flatten()]
-        return 0
+        return resp
 
     def close(self):
         with self.exit_lock:
