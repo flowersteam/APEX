@@ -11,7 +11,7 @@
       "radius": 0.225
     },
     "buffer_size": 32,
-    "ring_divider": 1.4
+    "ring_divider": 2.8
   },
   "rate": 15,
   "sound": {

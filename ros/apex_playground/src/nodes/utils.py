@@ -134,6 +134,10 @@ class BallTracking(object):
         cv2.destroyAllWindows()
 
 
+
+
+
+
 class MyBallTracking(object):
     def __init__(self, parameters):
         self.params = parameters
@@ -143,15 +147,13 @@ class MyBallTracking(object):
         self.dX, self.dY = (0, 0)
 
     def get_images(self, frame):
-        frame = frame[16:-16, 48:-48].astype('uint8')
         # resize the frame, blur it, and convert it to the HSV color space
         #frame = imutils.resize(frame, width=600)
         # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-        # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         mask_ball = cv2.inRange(hsv, self.params['tracking']['ball']['lower'], self.params['tracking']['ball']['upper'])
-        mask_ball = cv2.erode(mask_ball, None, iterations=4)
+        mask_ball = cv2.erode(mask_ball, None, iterations=2)
         mask_ball = cv2.dilate(mask_ball, None, iterations=10)
 
         mask_arena = cv2.inRange(hsv, self.params['tracking']['arena']['lower'], self.params['tracking']['arena']['upper'])
