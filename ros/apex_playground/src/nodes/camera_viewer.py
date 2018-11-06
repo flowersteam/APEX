@@ -6,9 +6,7 @@ matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 from rospkg import RosPack
 from apex_playground.srv import Camera, CameraRequest
-import json
 import os
-from os.path import join
 import numpy as np
 
 
@@ -25,6 +23,7 @@ class CameraViewer(object):
         image = np.array(image).reshape(144,176,3)
         plt.imshow(image)
         plt.show()
+
 
 if __name__ == "__main__":
     camera = CameraViewer()
