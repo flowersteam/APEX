@@ -143,7 +143,7 @@ class MyBallTracking(object):
         self.dX, self.dY = (0, 0)
 
     def get_images(self, frame):
-        frame = frame[16:-16, 48:-48]
+        frame = frame[16:-16, 48:-48].astype('uint8')
         # resize the frame, blur it, and convert it to the HSV color space
         #frame = imutils.resize(frame, width=600)
         # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
