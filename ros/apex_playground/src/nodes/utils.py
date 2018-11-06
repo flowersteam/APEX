@@ -239,12 +239,14 @@ class CameraRecorder(object):
     def get_image(self):
         rospy.wait_for_service('/{}/camera'.format(self.apex_name))
         read = rospy.ServiceProxy('/{}/camera'.format(self.apex_name), Camera)
-        return read(CameraRequest()).image
-
-        image = [x.data for x in read(CameraRequest()).image]
-        print(np.array(image).shape)
+        image = read(CameraRequest()).image
         image = np.array(image).reshape(144, 176, 3)
-        return np.flip(image, axis=2)
+        return image
+
+        # image = [x.data for x in read(CameraRequest()).image]
+        # print(np.array(image).shape)
+        # image = np.array(image).reshape(144, 176, 3)
+        # return np.flip(image, axis=2)
 
 
 class ErgoMover(object):
@@ -277,7 +279,6 @@ if __name__ == "__main__":
     import json
 
     from rospkg import RosPack
-    import time
 
     camera = CameraRecorder(1)
     frame = camera.get_image()
