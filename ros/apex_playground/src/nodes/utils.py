@@ -281,6 +281,7 @@ if __name__ == "__main__":
     camera = CameraRecorder(1)
     img = camera.get_image()
     print(img.shape)
+    img = np.ascontiguousarray(img, dtype=np.float32)
     plt.imshow(img)
     plt.show()
 
