@@ -242,12 +242,10 @@ class CameraRecorder(object):
         rospy.wait_for_service('/{}/camera'.format(self.apex_name))
         read = rospy.ServiceProxy('/{}/camera'.format(self.apex_name), Camera)
         image = [x.data for x in read(CameraRequest()).image]
-        image = np.array(image).reshape(176, 144, 3)
+        image = np.array(image).reshape(144, 176, 3)
 
-        # image = cv2.cvtColor(image, cv2.)
-
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         return image
-
         return np.flip(image, axis=2)
 
 
@@ -288,9 +286,6 @@ if __name__ == "__main__":
     plt.imshow(img)
     plt.show()
 
-    mover = ErgoMover(1)
-    mover.set_compliant(False)
-
     rospack = RosPack()
     with open(join(rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
         params = json.load(f)
@@ -300,30 +295,20 @@ if __name__ == "__main__":
     params['tracking']['arena']['upper'] = tuple(params['tracking']['arena']['upper'])
 
     tracking = MyBallTracking(params)
-    # tracking.open(*params['tracking']['resolution'])
-    # grabbed, frame = tracking.read()
 
     frame = img.astype('uint8')
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
 
-    plt.imshow(hsv)
-    plt.show()
-
     min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
     ball_center, _ = tracking.find_center('ball', frame, mask_ball, min_radius_ball)
 
-    plt.imshow(frame)
-    plt.show()
-
     min_radius_arena = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 2000.
     arena_center, arena_radius = tracking.find_center('arena', frame, mask_arena, min_radius_arena)
+
     ring_radius = int(arena_radius / params['tracking']['ring_divider']) if arena_radius is not None else None
 
     if ball_center is not None and arena_center is not None:
         elongation, theta = tracking.get_state(ball_center, arena_center)
-
-    plt.imshow(frame)
-    plt.show()
 
     frame = tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
     plt.imshow(frame)
