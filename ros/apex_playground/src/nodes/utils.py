@@ -147,7 +147,49 @@ if __name__ == "__main__":
     matplotlib.use("tkagg")
     import matplotlib.pyplot as plt
 
+    from os.path import join
+    import json
+
+    from rospkg import RosPack
+    import time
+
     camera = CameraRecorder(1)
     image = camera.get_image()
     plt.imshow(image)
     plt.show()
+    time.sleep(5)
+    plt.close()
+
+    mover = ErgoMover(1)
+    mover.set_compliant(False)
+
+    rospack = RosPack()
+    with open(join(rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
+        params = json.load(f)
+    params['tracking']['ball']['lower'] = tuple(params['tracking']['ball']['lower'])
+    params['tracking']['ball']['upper'] = tuple(params['tracking']['ball']['upper'])
+    params['tracking']['arena']['lower'] = tuple(params['tracking']['arena']['lower'])
+    params['tracking']['arena']['upper'] = tuple(params['tracking']['arena']['upper'])
+
+    tracking = BallTracking(params)
+    tracking.draw_history(image, )
+
+    frame = camera.get_image()
+    img = frame.copy().reshape(144, 176, 3)
+
+    hsv, mask_ball, mask_arena = tracking.get_images(frame)
+
+    min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
+    ball_center, _ = tracking.find_center('ball', frame, mask_ball, min_radius_ball)
+
+    min_radius_arena = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 2000.
+    arena_center, arena_radius = tracking.find_center('arena', frame, mask_arena, min_radius_arena)
+    ring_radius = int(arena_radius / params['tracking']['ring_divider']) if arena_radius is not None else None
+
+    if ball_center is not None and arena_center is not None:
+        elongation, theta = tracking.get_state(ball_center, arena_center)
+
+    frame = tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
+    plt.imshow(frame)
+    plt.show()
+
