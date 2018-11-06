@@ -13,10 +13,7 @@ class CameraService(object):
     def __init__(self, height, width):
         camera = cv2.VideoCapture(0)
         camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
-        test = camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
-        if not test:
-            print("Cannot open the webcam, exiting")
-            return
+        camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
         camera.set(cv2.cv.CV_CAP_PROP_FPS, 30)
         self.frame = np.zeros(1)
         self.frame_lock = Lock()
