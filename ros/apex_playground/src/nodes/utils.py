@@ -299,7 +299,7 @@ if __name__ == "__main__":
     # tracking.open(*params['tracking']['resolution'])
     # grabbed, frame = tracking.read()
 
-    frame = img.astype(np.int8)
+    frame = img.astype('uint8')
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
 
     min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
