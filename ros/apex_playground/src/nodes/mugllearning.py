@@ -25,7 +25,7 @@ from apex_playground.learning.dmp.mydmp import MyDMP
 from utils import BallTracking, CameraRecorder, ErgoMover
 
 
-class Environment(object):
+class ArenaEnvironment(object):
     def __init__(self, apex):
         self.rospack = RosPack()
         with open(join(self.rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
@@ -51,7 +51,7 @@ class Environment(object):
 
     def get_current_context(self, debug=False):
         frame = camera.get_image()
-        img = frame.copy().reshape(144, 176, 3)
+        img = frame.copy()
 
         hsv, mask_ball, mask_arena = self.tracking.get_images(frame)
 
@@ -60,10 +60,8 @@ class Environment(object):
 
         min_radius_arena = self.params['tracking']['resolution'][0] * self.params['tracking']['resolution'][1] / 2000.
         arena_center, arena_radius = self.tracking.find_center('arena', frame, mask_arena, min_radius_arena)
-        ring_radius = int(arena_radius / self.params['tracking']['ring_divider']) if arena_radius is not None else None
 
-        if ball_center is not None and arena_center is not None:
-            elongation, theta = self.tracking.get_state(ball_center, arena_center)
+        ring_radius = int(arena_radius / self.params['tracking']['ring_divider']) if arena_radius is not None else None
 
         if debug:
             frame = self.tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
@@ -74,7 +72,7 @@ class Environment(object):
             image.data = list(frame.reshape(length))
             self.image_pub.publish(image)
 
-        return img, elongation, theta
+        return img, ball_center, arena_center
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
@@ -93,7 +91,7 @@ class Environment(object):
 class DummyEnvironment(object):
     def __init__(self):
         self.params = {"tracking": {
-                        "resolution": [352, 288],
+                        "resolution": [176, 144],
                         "ball": {
                           "lower": [27, 45, 70],
                           "upper": [38, 255, 255]
@@ -104,7 +102,7 @@ class DummyEnvironment(object):
                           "radius": 0.225
                         },
                         "buffer_size": 32,
-                        "ring_divider": 1.4
+                        "ring_divider": 1.4 * 2
                       },
                       "rate": 15,
                       "sound": {
@@ -346,7 +344,7 @@ class Exploration(object):
     def explore(self, n_iter):
         for _ in range(n_iter):
             self.environment.reset()
-            context_img, context_elongation, context_theta = self.environment.get_current_context()
+            context_img, context_ball_center, context_arena_center = self.environment.get_current_context()
 
             left = int((context_img.shape[0] - 128) / 2)
             top = int((context_img.shape[1] - 128) / 2)
@@ -356,7 +354,7 @@ class Exploration(object):
             context_img = scipy.misc.imresize(context_img, (64, 64, 3))
 
             m = self.learner.produce(context_img)
-            outcome_img, outcome_elongation, outcome_theta = self.environment.update(m)
+            outcome_img, outcome_ball_center, outcome_arena_center = self.environment.update(m)
 
             left = int((outcome_img.shape[0] - 128) / 2)
             top = int((outcome_img.shape[1] - 128) / 2)
@@ -365,7 +363,8 @@ class Exploration(object):
             outcome_img = outcome_img[left:left + width, top:top + height]
             outcome_img = scipy.misc.imresize(outcome_img, (64, 64, 3))
 
-            self.learner.record((context_elongation, context_theta), (outcome_elongation, outcome_theta))
+            self.learner.record((context_ball_center, context_arena_center),
+                                (outcome_ball_center, outcome_arena_center))
             self.learner.perceive(context_img, outcome_img)
             self.learner.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
 
