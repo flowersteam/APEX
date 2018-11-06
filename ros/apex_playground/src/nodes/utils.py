@@ -147,7 +147,6 @@ class MyBallTracking(object):
         # resize the frame, blur it, and convert it to the HSV color space
         #frame = imutils.resize(frame, width=600)
         # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-        print(frame)
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         # hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
@@ -242,8 +241,8 @@ class CameraRecorder(object):
         read = rospy.ServiceProxy('/{}/camera'.format(self.apex_name), Camera)
         image = [x.data for x in read(CameraRequest()).image]
         image = np.array(image).reshape(144, 176, 3)
-        return image
-        # return np.flip(image, axis=2)
+        # return image
+        return np.flip(image, axis=2)
 
 
 class ErgoMover(object):
