@@ -145,7 +145,7 @@ if __name__ == "__main__":
     matplotlib.use("tkagg")
     import matplotlib.pyplot as plt
 
-    camera = CameraRecorder()
+    camera = CameraRecorder(1)
     image = camera.get_image()
     plt.imshow(image)
     plt.show()
