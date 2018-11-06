@@ -278,15 +278,17 @@ if __name__ == "__main__":
     from rospkg import RosPack
     import time
 
-    # camera = CameraRecorder(1)
-    # image = camera.get_image()
-    # plt.imshow(image)
-    # plt.show()
-    # time.sleep(2)
-    # plt.close('all')
-    #
-    # mover = ErgoMover(1)
-    # mover.set_compliant(False)
+    camera = CameraRecorder(1)
+    image = camera.get_image()
+    plt.imshow(image)
+    plt.show()
+
+    image = camera.get_image()
+    plt.imshow(image)
+    plt.show()
+
+    mover = ErgoMover(1)
+    mover.set_compliant(False)
 
     rospack = RosPack()
     with open(join(rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:

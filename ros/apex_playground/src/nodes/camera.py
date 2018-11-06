@@ -45,6 +45,8 @@ class CameraService(object):
             image = self.frame.copy()
         resp = CameraResponse()
         resp.image = [Float32(p) for p in image.astype(np.float32).flatten()]
+        # Debug
+        print("NTM")
         return resp
 
     def close(self):
