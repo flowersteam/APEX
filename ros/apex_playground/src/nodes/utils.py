@@ -244,7 +244,7 @@ class CameraRecorder(object):
         image = [x.data for x in read(CameraRequest()).image]
         image = np.array(image).reshape(144, 176, 3)
 
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        image = cv2.cvtColor(image.astype('uint8'), cv2.COLOR_BGR2RGB)
         return image
         return np.flip(image, axis=2)
 
