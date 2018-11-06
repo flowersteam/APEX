@@ -46,7 +46,7 @@ class CameraService(object):
         resp = CameraResponse()
         resp.image = [Float32(p) for p in image.astype(np.float32).flatten()]
         # Debug
-        print("NTM")
+        return 0
         return resp
 
     def close(self):

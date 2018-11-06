@@ -283,10 +283,6 @@ if __name__ == "__main__":
     plt.imshow(image)
     plt.show()
 
-    image = camera.get_image()
-    plt.imshow(image)
-    plt.show()
-
     mover = ErgoMover(1)
     mover.set_compliant(False)
 
