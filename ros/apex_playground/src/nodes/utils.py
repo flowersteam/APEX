@@ -315,6 +315,9 @@ if __name__ == "__main__":
     if ball_center is not None and arena_center is not None:
         elongation, theta = tracking.get_state(ball_center, arena_center)
 
+    plt.imshow(frame)
+    plt.show()
+
     frame = tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
     plt.imshow(frame)
     plt.show()
