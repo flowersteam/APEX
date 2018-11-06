@@ -302,6 +302,9 @@ if __name__ == "__main__":
     frame = img.astype('uint8')
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
 
+    plt.imshow(hsv)
+    plt.show()
+
     min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
     ball_center, _ = tracking.find_center('ball', frame, mask_ball, min_radius_ball)
 
