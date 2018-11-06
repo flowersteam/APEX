@@ -15,7 +15,7 @@ class CameraService(object):
         camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
         test = camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
         if not test:
-            rospy.logerr("Cannot open the webcam, exiting")
+            print("Cannot open the webcam, exiting")
             return
         camera.set(cv2.cv.CV_CAP_PROP_FPS, 30)
         self.frame = np.zeros(1)
