@@ -26,28 +26,14 @@ class CameraService(object):
 
     def __in_thread_loop(self, camera):
         while True:
-            with self.exit_lock:
-                do_exit = self.exit
-            success, frame = camera.read()
-            if do_exit:
-                camera.release()
-                break
-            if not success:
-                rospy.logerr("Frame acquire failed")
-                continue
-            else:
-                with self.frame_lock:
-                    self.frame = frame
-                time.sleep(1/20)
+            time.sleep(1/20)
 
     def read(self, req):
         with self.frame_lock:
             image = self.frame.copy()
         resp = CameraResponse()
         resp.image = [Float32(p) for p in image.astype(np.float32).flatten()]
-        # Debug
         return 0
-        return resp
 
     def close(self):
         with self.exit_lock:
