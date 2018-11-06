@@ -172,7 +172,6 @@ if __name__ == "__main__":
     params['tracking']['arena']['upper'] = tuple(params['tracking']['arena']['upper'])
 
     tracking = BallTracking(params)
-    tracking.draw_history(image, )
 
     frame = camera.get_image()
     img = frame.copy().reshape(144, 176, 3)

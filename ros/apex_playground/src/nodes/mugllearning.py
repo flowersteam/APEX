@@ -1,10 +1,10 @@
 #!/usr/bin/python
 
 import argparse
-# import rospy
-# from poppy_msgs.srv import ReachTarget, ReachTargetRequest, SetCompliant, SetCompliantRequest
-# from apex_playground.srv import Camera, CameraRequest
-# from sensor_msgs.msg import JointState
+import rospy
+from poppy_msgs.srv import ReachTarget, ReachTargetRequest, SetCompliant, SetCompliantRequest
+from apex_playground.srv import Camera, CameraRequest
+from sensor_msgs.msg import JointState
 import os
 import numpy as np
 from explauto.utils import bounds_min_max
