@@ -239,13 +239,9 @@ class CameraRecorder(object):
     def get_image(self):
         rospy.wait_for_service('/{}/camera'.format(self.apex_name))
         read = rospy.ServiceProxy('/{}/camera'.format(self.apex_name), Camera)
-        image = read(CameraRequest()).image
+        image = [x.data for x in read(CameraRequest()).image]
         image = np.array(image).reshape(144, 176, 3)
         return image
-
-        # image = [x.data for x in read(CameraRequest()).image]
-        # print(np.array(image).shape)
-        # image = np.array(image).reshape(144, 176, 3)
         # return np.flip(image, axis=2)
 
 
@@ -281,9 +277,9 @@ if __name__ == "__main__":
     from rospkg import RosPack
 
     camera = CameraRecorder(1)
-    frame = camera.get_image()
-    print(frame.shape)
-    plt.imshow(frame)
+    img = camera.get_image()
+    print(img.shape)
+    plt.imshow(img)
     plt.show()
 
     mover = ErgoMover(1)
@@ -301,6 +297,7 @@ if __name__ == "__main__":
     # tracking.open(*params['tracking']['resolution'])
     # grabbed, frame = tracking.read()
 
+    frame = img.astype(np.int8)
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
 
     min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
@@ -316,4 +313,3 @@ if __name__ == "__main__":
     frame = tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
     plt.imshow(frame)
     plt.show()
-
