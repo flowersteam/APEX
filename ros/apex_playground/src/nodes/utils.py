@@ -308,6 +308,9 @@ if __name__ == "__main__":
     min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
     ball_center, _ = tracking.find_center('ball', frame, mask_ball, min_radius_ball)
 
+    plt.imshow(frame)
+    plt.show()
+
     min_radius_arena = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 2000.
     arena_center, arena_radius = tracking.find_center('arena', frame, mask_arena, min_radius_arena)
     ring_radius = int(arena_radius / params['tracking']['ring_divider']) if arena_radius is not None else None
