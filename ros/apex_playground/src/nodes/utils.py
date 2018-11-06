@@ -299,6 +299,9 @@ if __name__ == "__main__":
     tracking = BallTracking(params)
     grabbed, frame = tracking.read()
 
+    print(grabbed)
+    print(frame)
+    
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
 
     min_radius_ball = params['tracking']['resolution'][0] * params['tracking']['resolution'][1] / 20000.
