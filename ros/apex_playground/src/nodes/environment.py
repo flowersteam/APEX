@@ -37,7 +37,6 @@ class Environment(object):
 
     def run(self):
         if not self.tracking.open(*self.params['tracking']['resolution']):
-            print("Cannot open the webcam, exiting")
             rospy.logerr("Cannot open the webcam, exiting")
             return
 

@@ -120,7 +120,7 @@ class BallTracking(object):
             return False
         else:
             self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_HEIGHT, height)
-            return self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
+            self.camera.set(cv2.cv.CV_CAP_PROP_FRAME_WIDTH, width)
             return True
 
     def close(self):
