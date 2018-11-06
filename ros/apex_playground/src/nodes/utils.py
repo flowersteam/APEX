@@ -147,8 +147,8 @@ class MyBallTracking(object):
         # resize the frame, blur it, and convert it to the HSV color space
         #frame = imutils.resize(frame, width=600)
         # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        # hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+        # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         mask_ball = cv2.inRange(hsv, self.params['tracking']['ball']['lower'], self.params['tracking']['ball']['upper'])
         mask_ball = cv2.erode(mask_ball, None, iterations=4)
