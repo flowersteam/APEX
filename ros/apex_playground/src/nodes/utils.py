@@ -23,7 +23,8 @@ class BallTracking(object):
         # resize the frame, blur it, and convert it to the HSV color space
         #frame = imutils.resize(frame, width=600)
         # blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-        hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
+        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        # hsv = cv2.cvtColor(frame, cv2.COLOR_RGB2HSV)
 
         mask_ball = cv2.inRange(hsv, self.params['tracking']['ball']['lower'], self.params['tracking']['ball']['upper'])
         mask_ball = cv2.erode(mask_ball, None, iterations=4)
@@ -157,8 +158,8 @@ if __name__ == "__main__":
     image = camera.get_image()
     plt.imshow(image)
     plt.show()
-    time.sleep(5)
-    plt.close()
+    time.sleep(2)
+    plt.close('all')
 
     mover = ErgoMover(1)
     mover.set_compliant(False)
