@@ -380,11 +380,12 @@ if __name__ == "__main__":
                   s_mins=[-2.5] * 20,
                   s_maxs=[2.5] * 20)
     learner = Learner(config)
-    environment = ArenaEnvironment(1)
+    environment = ArenaEnvironment(1, debug=True)
     exploration = Exploration(learner, environment)
     exploration.explore(1)
 
-
+    import sys
+    sys.exit(0)
 
 
 
