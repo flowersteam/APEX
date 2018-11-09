@@ -28,6 +28,7 @@ class CameraRecorder(object):
         image = np.array(image).reshape(144, 176, 3)
         return image
 
+
 class ErgoDMP(object):
     def __init__(self, n_apex):
         self._apex_name = "apex_{}".format(n_apex)

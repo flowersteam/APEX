@@ -14,6 +14,7 @@ from rospkg import RosPack
 from os.path import join
 import json
 import pickle
+import matplotlib.pyplot as plt
 
 from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
@@ -26,7 +27,8 @@ from utils import BallTracking, CameraRecorder, ErgoMover
 
 
 class ArenaEnvironment(object):
-    def __init__(self, apex):
+    def __init__(self, apex, debug=False):
+        self.debug = debug
         self.rospack = RosPack()
         with open(join(self.rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
             self.params = json.load(f)
@@ -63,14 +65,17 @@ class ArenaEnvironment(object):
 
         ring_radius = int(arena_radius / self.params['tracking']['ring_divider']) if arena_radius is not None else None
 
-        if debug:
+        if self.debug:
             frame = self.tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
-            image = Float32MultiArray()
-            for dim in range(len(frame.shape)):
-                image.layout.dim.append(MultiArrayDimension(size=frame.shape[dim], label=str(frame.dtype)))
-            length = reduce(int.__mul__, frame.shape)
-            image.data = list(frame.reshape(length))
-            self.image_pub.publish(image)
+            plt.imshow(frame)
+            plt.show()
+
+            # image = Float32MultiArray()
+            # for dim in range(len(frame.shape)):
+            #     image.layout.dim.append(MultiArrayDimension(size=frame.shape[dim], label=str(frame.dtype)))
+            # length = reduce(int.__mul__, frame.shape)
+            # image.data = list(frame.reshape(length))
+            # self.image_pub.publish(image)
 
         return img, ball_center, arena_center
 
@@ -375,7 +380,7 @@ if __name__ == "__main__":
                   s_mins=[-2.5] * 20,
                   s_maxs=[2.5] * 20)
     learner = Learner(config)
-    environment = DummyEnvironment()
+    environment = ArenaEnvironment(1)
     exploration = Exploration(learner, environment)
     exploration.explore(1)
 

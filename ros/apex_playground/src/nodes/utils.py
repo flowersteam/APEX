@@ -164,7 +164,7 @@ if __name__ == "__main__":
     params['tracking']['arena']['lower'] = tuple(params['tracking']['arena']['lower'])
     params['tracking']['arena']['upper'] = tuple(params['tracking']['arena']['upper'])
 
-    tracking = MyBallTracking(params)
+    tracking = BallTracking(params)
 
     frame = img
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
