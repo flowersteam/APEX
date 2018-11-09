@@ -405,7 +405,7 @@ class BetaVAE(nn.Module):
 
 class PytorchBetaVAERepresentation(object):
 
-    def __init__(self, n_latents, initial_epochs, beta, *args, network_type='cnn', n_channels=3, height=70, width=70,
+    def __init__(self, n_latents, initial_epochs, beta, network_type='cnn', n_channels=3, height=70, width=70,
                  batch_size=128, learning_rate=1e-2, Ta=1, capacity=0, capacity_change_duration=1,
                  visdom_record=False, visdom_env="main", log_interval=40, store_loader_gpu=True, logdir='',
                  **kwargs):
@@ -635,7 +635,7 @@ class PytorchBetaVAERepresentation(object):
 
         self._model.eval()
 
-    def act(self, *args, X_pred=None, X_train=None, y_train=None, X_test=None, y_test=None):
+    def act(self, X_pred=None, X_train=None, y_train=None, X_test=None, y_test=None):
 
         if X_train is not None and X_pred is not None and X_test is not None:
             raise Exception("Calling multiple modes at once is not possible.")

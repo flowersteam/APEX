@@ -14,6 +14,8 @@ from rospkg import RosPack
 from os.path import join
 import json
 import pickle
+import matplotlib
+matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 
 from explauto.utils import prop_choice
@@ -44,15 +46,16 @@ class ArenaEnvironment(object):
         self.ergo_mover.set_compliant(False)
 
         self.n_dmps = 6
-        n_bfs = 7
+        self.n_bfs = 7
+        self.m_ndims = self.n_bfs * self.n_dmps + self.n_dmps
         timesteps = 30
-        max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
+        max_params = np.array([300.] * self.n_bfs * self.n_dmps + [1.] * self.n_dmps)
         self.bounds_motors_max = np.array([180, 0, 40, 70, 20, 70])
-        self.bounds_motors_min = np.array([-180, 0, 0, -70, 0, 0])
-        self.dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
+        self.bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
+        self.dmp = MyDMP(n_dmps=self.n_dmps, n_bfs=self.n_bfs, timesteps=timesteps, max_params=max_params)
 
     def get_current_context(self, debug=False):
-        frame = camera.get_image()
+        frame = self.camera.get_image()
         img = frame.copy()
 
         hsv, mask_ball, mask_arena = self.tracking.get_images(frame)
@@ -67,8 +70,13 @@ class ArenaEnvironment(object):
 
         if self.debug:
             frame = self.tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
+            import scipy.misc
+            scipy.misc.imsave('/home/flowers/Documents/tests/frame.jpeg', frame)
+            scipy.misc.imsave('/home/flowers/Documents/tests/img.jpeg', img)
             plt.imshow(frame)
             plt.show()
+            import time
+            time.sleep(1)
 
             # image = Float32MultiArray()
             # for dim in range(len(frame.shape)):
@@ -81,7 +89,7 @@ class ArenaEnvironment(object):
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
-        self.ergo.move_to(list(point), duration=1)
+        self.ergo_mover.move_to(list(point), duration=1)
 
     def update(self, m):
         normalized_traj = self.dmp.trajectory(m)
@@ -158,7 +166,9 @@ class DummyEnvironment(object):
 
 
 class Learner(object):
-    def __init__(self, config, babbling_mode="MGEVAE", n_motor_babbling=0.1, explo_noise=0.05, choice_eps=0.1):
+    def __init__(self, config, environment, babbling_mode, n_motor_babbling=0.1,
+                 explo_noise=0.05, choice_eps=0.1):
+        self.environment = environment
         self.babbling_mode = babbling_mode
         self.n_motor_babbling = n_motor_babbling
         self.explo_noise = explo_noise
@@ -186,7 +196,7 @@ class Learner(object):
         self.s_spaces = dict(s_latents=self.s_latents)
 
         self.ms = None
-        self.mid_control = ''
+        self.mid_control = None
         self.measure_interest = False
 
         # print()
@@ -244,6 +254,7 @@ class Learner(object):
             return self.motor_babbling()
         else:
             mid = self.choose_babbling_module()
+            self.mid_control = mid
 
             explore = True
             self.measure_interest = False
@@ -314,9 +325,12 @@ class Learner(object):
         return {"ms": np.array(self.ms, dtype=np.float16),
                 "chosen_module": self.chosen_modules[i],
                 "goal": self.goals[i],
+                "context": self.contexts[i],
+                "outcome": self.outcomes[i],
                 "interests": interests}
 
     def save(self, experiment_name, task, trial, folder="/media/usb/"):
+        print('saving')
         folder_trial = os.path.join(folder, experiment_name, "task_" + str(task),
                                     "condition_" + str(self.babbling_mode), "trial_" + str(trial))
         if not os.path.isdir(folder_trial):
@@ -339,13 +353,6 @@ class Learner(object):
         self.contexts.append(context)
         self.outcomes.append(outcome)
 
-
-class Exploration(object):
-    def __init__(self, learner, environment):
-        # TODO
-        self.environment = environment
-        self.learner = learner
-
     def explore(self, n_iter):
         for _ in range(n_iter):
             self.environment.reset()
@@ -358,7 +365,7 @@ class Exploration(object):
             context_img = context_img[left:left + width, top:top + height]
             context_img = scipy.misc.imresize(context_img, (64, 64, 3))
 
-            m = self.learner.produce(context_img)
+            m = self.produce(context_img)
             outcome_img, outcome_ball_center, outcome_arena_center = self.environment.update(m)
 
             left = int((outcome_img.shape[0] - 128) / 2)
@@ -368,21 +375,20 @@ class Exploration(object):
             outcome_img = outcome_img[left:left + width, top:top + height]
             outcome_img = scipy.misc.imresize(outcome_img, (64, 64, 3))
 
-            self.learner.record((context_ball_center, context_arena_center),
-                                (outcome_ball_center, outcome_arena_center))
-            self.learner.perceive(context_img, outcome_img)
-            self.learner.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
+            self.record((context_ball_center, context_arena_center),
+                        (outcome_ball_center, outcome_arena_center))
+            self.perceive(context_img, outcome_img)
+            self.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../data/test")
 
 
 if __name__ == "__main__":
-    config = dict(m_mins=[-1.] * 6,
-                  m_maxs=[1.] * 6,
+    environment = ArenaEnvironment(1, debug=False)
+    config = dict(m_mins=[-1.] * environment.m_ndims,
+                  m_maxs=[1.] * environment.m_ndims,
                   s_mins=[-2.5] * 20,
                   s_maxs=[2.5] * 20)
-    learner = Learner(config)
-    environment = ArenaEnvironment(1, debug=True)
-    exploration = Exploration(learner, environment)
-    exploration.explore(1)
+    learner = Learner(config, environment, babbling_mode="MGEVAE")
+    learner.explore(20)
 
     import sys
     sys.exit(0)
