@@ -358,7 +358,8 @@ class FILearner(object):
         # if self.ball_moves(s[92:112]):
         #     rospy.sleep(5)
 
-        context_sensori = np.stack([context, outcome])
+        context_sensori = np.concatenate([context, outcome])
+
         ms = self.set_ms(self.m, context_sensori)
         self.ms = ms
         self.update_sensorimotor_models(ms)

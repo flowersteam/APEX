@@ -41,7 +41,16 @@ class ArenaEnvironment(object):
         self.bounds_motors_min = np.array([-180, -40, -50, -70, -50, -50])
         self.dmp = MyDMP(n_dmps=self.n_dmps, n_bfs=self.n_bfs, timesteps=timesteps, max_params=max_params)
 
-    def get_current_context(self):
+        self.ball_center = None
+        self.arena_center = None
+        self.get_ball_position()
+        if not self.ball_center:
+            print("Could not find ball center, exiting.")
+            import sys
+            sys.exit(0)
+
+
+    def get_ball_position(self):
         frame = self.camera.get_image()
         img = frame.copy()
 
@@ -71,9 +80,18 @@ class ArenaEnvironment(object):
             # image.data = list(frame.reshape(length))
             # self.image_pub.publish(image)
 
+        if ball_center is not None:
+            self.ball_center = np.array(ball_center)
+        if arena_center is not None:
+            self.arena_center = np.array(arena_center)
+
+        return img
+
+    def get_current_context(self):
+        img = self.get_ball_position()
         ergo_pos = self.ergo_tracker.get_position()
 
-        return img, np.array(ball_center), np.array(arena_center), ergo_pos
+        return img, self.ball_center, self.arena_center, ergo_pos
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
