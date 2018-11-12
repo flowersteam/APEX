@@ -121,8 +121,8 @@ class MUGLLearner(object):
             # We check the reconstruction by the reprensentation
             self.representation.act(X_pred=np.array(context))
             reconstruction = self.representation.prediction[0]
-            scipy.misc.imsave('/home/flowers/Documents/tests/context.jpeg', context)
-            scipy.misc.imsave('/home/flowers/Documents/tests/reconstruction.jpeg', reconstruction)
+            scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
+            scipy.misc.imsave('/home/flowers/Documents/tests/reconstruction' + str(self.t) + '.jpeg', reconstruction)
         if np.random.random() < self.n_motor_babbling:
             self.mid_control = None
             self.chosen_modules.append("motor_babbling")

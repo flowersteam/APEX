@@ -73,7 +73,7 @@ class ArenaEnvironment(object):
 
         ergo_pos = self.ergo_tracker.get_position()
 
-        return img, ball_center, arena_center, ergo_pos
+        return img, np.array(ball_center), np.array(arena_center), ergo_pos
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
