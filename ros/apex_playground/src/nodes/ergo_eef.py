@@ -12,6 +12,7 @@ class ErgoEefPos(object):
         self.sub = rospy.Subscriber("poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
+        rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg)
         self.eef_pose = msg
 
     def run(self):
