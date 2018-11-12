@@ -2,13 +2,16 @@ import matplotlib
 matplotlib.use("tkagg")
 import matplotlib.pyplot as plt
 
+import scipy.misc
+import numpy as np
+
 from explauto.utils import bounds_min_max
 from rospkg import RosPack
 from os.path import join
 import json
 from apex_playground.learning.dmp.mydmp import MyDMP
 
-from utils import BallTracking, CameraRecorder, ErgoMover
+from utils import BallTracker, CameraRecorder, ErgoMover, ErgoTracker
 
 
 class ArenaEnvironment(object):
@@ -22,7 +25,8 @@ class ArenaEnvironment(object):
         self.params['tracking']['arena']['lower'] = tuple(self.params['tracking']['arena']['lower'])
         self.params['tracking']['arena']['upper'] = tuple(self.params['tracking']['arena']['upper'])
 
-        self.tracking = BallTracking(self.params)
+        self.ball_tracking = BallTracker(self.params)
+        self.ergo_tracker = ErgoTracker(apex)
         self.camera = CameraRecorder(apex)
 
         self.ergo_mover = ErgoMover(apex)
@@ -41,18 +45,18 @@ class ArenaEnvironment(object):
         frame = self.camera.get_image()
         img = frame.copy()
 
-        hsv, mask_ball, mask_arena = self.tracking.get_images(frame)
+        hsv, mask_ball, mask_arena = self.ball_tracking.get_images(frame)
 
         min_radius_ball = self.params['tracking']['resolution'][0] * self.params['tracking']['resolution'][1] / 20000.
-        ball_center, _ = self.tracking.find_center('ball', frame, mask_ball, min_radius_ball)
+        ball_center, _ = self.ball_tracking.find_center('ball', frame, mask_ball, min_radius_ball)
 
         min_radius_arena = self.params['tracking']['resolution'][0] * self.params['tracking']['resolution'][1] / 2000.
-        arena_center, arena_radius = self.tracking.find_center('arena', frame, mask_arena, min_radius_arena)
+        arena_center, arena_radius = self.ball_tracking.find_center('arena', frame, mask_arena, min_radius_arena)
 
         ring_radius = int(arena_radius / self.params['tracking']['ring_divider']) if arena_radius is not None else None
 
         if self.debug:
-            frame = self.tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
+            frame = self.ball_tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
             scipy.misc.imsave('/home/flowers/Documents/tests/frame.jpeg', frame)
             scipy.misc.imsave('/home/flowers/Documents/tests/img.jpeg', img)
             plt.imshow(frame)
@@ -67,7 +71,9 @@ class ArenaEnvironment(object):
             # image.data = list(frame.reshape(length))
             # self.image_pub.publish(image)
 
-        return img, ball_center, arena_center
+        ergo_pos = self.ergo_tracker.get_position()
+
+        return img, ball_center, arena_center, ergo_pos
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
@@ -109,7 +115,7 @@ class DummyEnvironment(object):
         self.params['tracking']['arena']['lower'] = tuple(self.params['tracking']['arena']['lower'])
         self.params['tracking']['arena']['upper'] = tuple(self.params['tracking']['arena']['upper'])
 
-        self.tracking = BallTracking(self.params)
+        self.tracking = BallTracker(self.params)
 
     def get_current_context(self, debug=False):
         frame = scipy.misc.imread('/Users/adrien/Documents/post-doc/expe_poppy/imgs/8.jpeg')

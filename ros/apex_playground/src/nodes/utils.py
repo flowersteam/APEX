@@ -2,7 +2,7 @@
 
 import rospy
 from poppy_msgs.srv import ReachTarget, ReachTargetRequest, SetCompliant, SetCompliantRequest
-from apex_playground.srv import Camera, CameraRequest
+from apex_playground.srv import Camera, CameraRequest, ErgoPose, ErgoPoseRequest
 from sensor_msgs.msg import JointState
 import numpy as np
 import cv2
@@ -10,7 +10,7 @@ from numpy import arctan2, sqrt
 from collections import deque
 
 
-class BallTracking(object):
+class BallTracker(object):
     def __init__(self, parameters):
         self.params = parameters
 
@@ -140,6 +140,19 @@ class ErgoMover(object):
         rospy.sleep(duration - 0.05)
 
 
+class ErgoTracker(object):
+    def __init__(self, n_apex):
+        self.apex_name = "apex_{}".format(n_apex)
+        rospy.wait_for_service('/{}/ergoeff'.format(self.apex_name))
+        self.get_msg = rospy.ServiceProxy('/{}/ergoeff'.format(self.apex_name), ErgoPose)
+        print("ErgoTracker on ", self.apex_name)
+
+    def get_position(self):
+        msg = self.get_msg(ErgoPoseRequest())
+        pos = np.array([msg.pos.pose.position.x, msg.pos.pose.position.y, msg.pos.pose.position.z])
+        return pos
+
+
 if __name__ == "__main__":
     import matplotlib
     matplotlib.use("tkagg")
@@ -164,7 +177,7 @@ if __name__ == "__main__":
     params['tracking']['arena']['lower'] = tuple(params['tracking']['arena']['lower'])
     params['tracking']['arena']['upper'] = tuple(params['tracking']['arena']['upper'])
 
-    tracking = BallTracking(params)
+    tracking = BallTracker(params)
 
     frame = img
     hsv, mask_ball, mask_arena = tracking.get_images(frame)
