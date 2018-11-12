@@ -276,8 +276,8 @@ class FILearner(object):
 
         self.m_space = list(range(m_ndims))
         self.c_dims = range(m_ndims, m_ndims + 2)
-        self.s_ergo = range(m_ndims + 2, m_ndims + 3)
-        self.s_ball = range(m_ndims + 3, m_ndims + 5)
+        self.s_ergo = range(m_ndims + 2, m_ndims + 5)
+        self.s_ball = range(m_ndims + 5, m_ndims + 7)
 
         self.ms = None
         self.mid_control = None
