@@ -26,7 +26,7 @@ class ErgoEefService(object):
         rospy.loginfo("Done, end effector position perception is up!")
         rospy.spin()
 
-    def get_pos(self, req):
+    def get_pos(self):
         return self.ergo_pos.eef_pos
 
 
