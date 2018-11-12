@@ -13,7 +13,7 @@ class ErgoEefPos(object):
 
     def cb_eef(self, msg):
         # rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.pose.position)
-        print(np.array([coor for coor in msg.pose.position]))
+        print(np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]))
         self.cur_eef_pos = msg
 
     @property
