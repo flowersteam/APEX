@@ -44,7 +44,7 @@ class ArenaEnvironment(object):
         self.ball_center = None
         self.arena_center = None
         self.get_ball_position()
-        if not self.ball_center:
+        if self.ball_center is None:
             print("Could not find ball center, exiting.")
             import sys
             sys.exit(0)
