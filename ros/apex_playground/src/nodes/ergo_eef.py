@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import PoseStamped
-from apex_playground.srv import ErgoPose, ErgoPoseResponse
+# from apex_playground.srv import ErgoPose, ErgoPoseResponse
 
 
 class ErgoEefPos(object):
