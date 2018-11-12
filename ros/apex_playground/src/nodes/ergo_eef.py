@@ -7,9 +7,6 @@ from geometry_msgs.msg import PoseStamped
 class ErgoEefPos(object):
     def __init__(self):
         self.apex_name = "apex_1"
-        # self.rospack = RosPack()
-        # print("Ego Eff Pose on {}".format(n_apex))
-        # rospy.Subscriber(self.topics["torso_l_eef"]["topic"], self.topics["torso_l_eef"]["type"], self.cb_eef)
         # self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
@@ -23,7 +20,7 @@ class ErgoEefPos(object):
         rospy.loginfo("Done, perception is up!")
         rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
         rospy.loginfo("Done, perception is down!")
-        rospy.spin()
+        # rospy.spin()
 
     # def get(self):
     #    return self.eef_pose
@@ -49,5 +46,7 @@ class ErgoEefService(object):
 
 if __name__ == '__main__':
     rospy.init_node('ergoeff')
-    ErgoEefPos().run()
+    ergo = ErgoEefPos()
+    ergo.run()
+    print(ergo.ergo)
     # ErgoEefService().run()
