@@ -284,13 +284,13 @@ class FILearner(object):
         self.measure_interest = False
 
         # Create the learning modules:
-        if self.babbling_mode == "Flat":
+        if self.babbling_mode == "FlatFI":
             self.modules["mod1"] = LearningModule("mod", self.m_space, self.c_dims + self.s_ergo + self.s_ball,
                                                   self.conf, context_mode=dict(mode='mcs', context_n_dims=2,
                                                                                context_sensory_bounds=[[-1., -1.],
                                                                                                        [1., 1.]]),
                                                   explo_noise=self.explo_noise)
-        elif self.babbling_mode == "Modular":
+        elif self.babbling_mode == "ModularFI":
             self.modules["mod1"] = LearningModule("mod", self.m_space, self.c_dims + self.s_ergo,
                                                   self.conf, context_mode=dict(mode='mcs', context_n_dims=2,
                                                                                context_sensory_bounds=[[-1., -1.],
@@ -448,7 +448,7 @@ if __name__ == "__main__":
                       s_maxs=[2.5] * 20)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                               experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
-    elif "MUGL" in args.babbling:
+    elif "VAE" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 20,
