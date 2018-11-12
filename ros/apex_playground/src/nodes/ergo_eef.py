@@ -11,6 +11,7 @@ class ErgoEefPos(object):
         self.sub = rospy.Subscriber("poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
+        print(np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]))
         self.cur_eef_pos = msg
 
     @property
