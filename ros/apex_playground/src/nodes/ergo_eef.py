@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import PoseStamped
+from apex_playground.srv import ErgoPose, ErgoPoseResponse
 
 
 class ErgoEefPos(object):
@@ -9,7 +10,7 @@ class ErgoEefPos(object):
         # self.rospack = RosPack()
         # print("Ego Eff Pose on {}".format(n_apex))
         # rospy.Subscriber(self.topics["torso_l_eef"]["topic"], self.topics["torso_l_eef"]["type"], self.cb_eef)
-        # self.sub = rospy.Subscriber("poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
+        self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
         rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg)
@@ -32,6 +33,20 @@ class ErgoEefPos(object):
         return self.eef_pose
 
 
+class ErgoEefService(object):
+    def __init__(self):
+        self.pos = ErgoEefPos()
+
+    def run(self):
+        rospy.loginfo("Perception is down!")
+        rospy.Service("ergoeff", ErgoPose, self.get_pos)
+        rospy.loginfo("Done, perception is up!")
+        rospy.spin()
+
+    def get_pos(self):
+        return self.pos.ergo
+
+
 if __name__ == '__main__':
     rospy.init_node('ergoeff')
-    ErgoEefPos().run()
+    ErgoEefService().run()
