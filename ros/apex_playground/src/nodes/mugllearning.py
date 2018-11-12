@@ -285,23 +285,32 @@ class FILearner(object):
 
         # Create the learning modules:
         if self.babbling_mode == "FlatFI":
-            self.modules["mod1"] = LearningModule("mod", self.m_space, self.c_dims + self.s_ergo + self.s_ball,
+            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo + self.s_ball,
                                                   self.conf, context_mode=dict(mode='mcs', context_n_dims=2,
                                                                                context_sensory_bounds=[[-1., -1.],
                                                                                                        [1., 1.]]),
                                                   explo_noise=self.explo_noise)
         elif self.babbling_mode == "ModularFI":
-            self.modules["mod1"] = LearningModule("mod", self.m_space, self.c_dims + self.s_ergo,
+            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo,
                                                   self.conf, context_mode=dict(mode='mcs', context_n_dims=2,
                                                                                context_sensory_bounds=[[-1., -1.],
                                                                                                        [1., 1.]]),
                                                   explo_noise=self.explo_noise)
-            self.modules["mod1"] = LearningModule("mod", self.m_space, self.c_dims + self.ball,
+            self.modules["mod1"] = LearningModule("mod2", self.m_space, self.c_dims + self.ball,
                                                   self.conf, context_mode=dict(mode='mcs', context_n_dims=2,
                                                                                context_sensory_bounds=[[-1., -1.],
                                                                                                        [1., 1.]]),
                                                   explo_noise=self.explo_noise)
         else:
+            module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                    interest_model='normal',
+                                    context_mode=dict(mode='mcs',
+                                                      context_n_dims=self.representation.n_latents // n_modules,
+                                                      context_dims=list(c_mod),
+                                                      context_sensory_bounds=[
+                                                          [-2.5] * (self.representation.n_latents // n_modules),
+                                                          [2.5] * (self.representation.n_latents // n_modules)]),
+                                    explo_noise=self.explo_noise)
             raise NotImplementedError
 
         for mid in self.modules.keys():
@@ -466,8 +475,8 @@ if __name__ == "__main__":
     elif "FI" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
-                      s_mins=[-1] * 5,
-                      s_maxs=[1] * 5)
+                      s_mins=[-1] * 7,
+                      s_maxs=[1] * 7)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                             experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
     else:
