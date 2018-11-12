@@ -64,6 +64,7 @@ add_service_files(
   FILES
   ExecuteErgoTrajectory.srv
   Camera.srv
+  ErgoPose.srv
   GetSensorialState.srv  
   GetInterests.srv
   Produce.srv
