@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 import rospy
 from geometry_msgs.msg import PoseStamped
-# from apex_playground.srv import ErgoPose, ErgoPoseResponse
+from apex_playground.srv import ErgoPose, ErgoPoseResponse
 
 
 class ErgoEefPos(object):
     def __init__(self):
         self.apex_name = "apex_1"
-        # self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
+        self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
         rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg)
-        self.eef_pose = msg
+        self.cur_eef_pos = msg
 
     def run(self):
         # rospy.wait_for_service(service)
@@ -20,19 +20,19 @@ class ErgoEefPos(object):
         rospy.loginfo("Done, perception is up!")
         rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
         rospy.loginfo("Done, perception is down!")
-        # rospy.spin()
+        rospy.spin()
 
     # def get(self):
     #    return self.eef_pose
 
     @property
-    def ergo(self):
-        return self.eef_pose
+    def eef_pos(self):
+        return self.cur_eef_pos
 
 
 class ErgoEefService(object):
     def __init__(self):
-        self.pos = ErgoEefPos()
+        self.ergo_pos = ErgoEefPos()
 
     def run(self):
         rospy.loginfo("Perception is down!")
@@ -41,12 +41,12 @@ class ErgoEefService(object):
         rospy.spin()
 
     def get_pos(self):
-        return self.pos.ergo
+        return self.ergo_pos.eef_pos
 
 
 if __name__ == '__main__':
     rospy.init_node('ergoeff')
-    ergo = ErgoEefPos()
+    ergo = ErgoEefService()
     ergo.run()
-    print(ergo.ergo)
+    # print(ergo.ergo)
     # ErgoEefService().run()
