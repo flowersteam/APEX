@@ -13,9 +13,9 @@ else:
     
 # PARAMS
 log_dir = "/data/APEX/"
-configs = dict(RMB=12, AMB=12)
-iterations = 20000
-
+configs = dict(RMB=4)
+iterations = 6000
+task = "task_1"
 
 def get_m(ms):
     return ms[:32]
@@ -58,7 +58,7 @@ for config in configs.keys():
         try:
             for iteration in range(iterations):
                 
-                filename = log_dir + experiment_name + "/condition_" + config + "/trial_" + str(trial) + "/iteration_" + str(iteration) + ".pickle"            
+                filename = log_dir + experiment_name + "/" + task + "/condition_" + config + "/trial_" + str(trial) + "/iteration_" + str(iteration) + ".pickle"            
                 with open(filename, 'r') as f:
                     log_i = cPickle.load(f)
                 
