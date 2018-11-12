@@ -6,7 +6,7 @@ from apex_playground.srv import ErgoPose, ErgoPoseResponse
 
 class ErgoEefPos(object):
     def __init__(self):
-        self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
+        self.sub = rospy.Subscriber("poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
         rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.pose.position)

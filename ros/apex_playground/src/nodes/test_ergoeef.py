@@ -13,7 +13,6 @@ class ErgoPos(object):
     def get_position(self):
         # msg = self.get_msg()
         msg = self.get_msg(ErgoPoseRequest())
-        print(msg)
         pos = np.array([msg.pos.pose.position.x, msg.pos.pose.position.y, msg.pos.pose.position.z])
         print(pos)
 
