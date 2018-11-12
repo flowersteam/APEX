@@ -748,7 +748,7 @@ class PytorchBetaVAERepresentation(object):
         with torch.no_grad():
             for batch_idx, (data, _) in enumerate(data_loader):
                 X_train = data.to(device)
-                pred.append(self._model(X_train)[0].cpu().detach().numpy())
+                pred.append(torch.sigmoid(self._model(X_train)[0]).cpu().detach().numpy())
 
         self.prediction = np.concatenate(pred)
 
@@ -794,16 +794,14 @@ ArmBallsBetaVAE.load_model(model_path)
 
 
 if __name__ == '__main__':
-    from armstickball import ArmStickBallRenderer
-    from armball import MyArmBallObserved
-    from actors import RandomGoalExplorationUglBeta
+    from latentgoalexplo.environments.armballs import ArmBallsRenderer
 
     # We observe the ball moving (probably a scientist)
-    a = ArmStickBallRenderer(width=64, height=64, rgb=True, render_arm=False, object_size=0.2, stick_length=0.4)
+    a = ArmBallsRenderer(width=64, height=64, rgb=True, render_arm=False, object_size=0.2, stick_length=0.4)
     outcomes_train = []
     a.reset()
-    for i in range(100):
-        random_state = np.concatenate([[0, 0, 0, 0, 0, 0, 0], np.random.uniform(-1, 1, 7)])
+    for i in range(1):
+        random_state = np.concatenate([[0, 0, 0, 0, 0, 0, 0, 0, 1], np.random.uniform(-1, 1, 4)])
         a.act(observation=random_state)
         outcomes_train.append(a.rendering)
     outcomes_train = np.array(outcomes_train)
@@ -813,6 +811,6 @@ if __name__ == '__main__':
     rep = PytorchBetaVAERepresentation(beta=100, n_latents=10, width=64, height=64, network_type='cnn', n_channels=3,
                                        initial_epochs=20, Ta=200, capacity=25, capacity_change_duration=12,
                                        batch_size=32, learning_rate=1e-4,
-                                       visdom_record=True, visdom_env="test", log_interval=1)
+                                       visdom_record=False, visdom_env="test", log_interval=1)
     rep.reset(X_train=outcomes_train, y_train=outcomes_train, typical_img=outcomes_train[0])
     print('PytorchBetaVAERepresentation working')

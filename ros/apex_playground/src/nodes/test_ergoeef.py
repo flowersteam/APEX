@@ -1,35 +1,28 @@
 import rospy
-from rospkg import RosPack
 from geometry_msgs.msg import PoseStamped
-import time
+from apex_playground.srv import ErgoPose, ErgoPoseRequest
 
 
-class ErgoEefPose(object):
+class ErgoPos(object):
     def __init__(self, n_apex):
         self.apex_name = "apex_{}".format(n_apex)
-        # self.rospack = RosPack()
-        print("Ego Eff Pose on {}".format(n_apex))
-        # rospy.Subscriber(self.topics["torso_l_eef"]["topic"], self.topics["torso_l_eef"]["type"], self.cb_eef)
-        self.sub = rospy.Subscriber("/{}/poppy_ergo_jr/end_effector_pose".format(n_apex), PoseStamped, self.cb_eef)
+        print("ErgoPose on ", self.apex_name)
 
-    def cb_eef(self, msg):
-        self.eef_pose = msg
+    def get_pose(self):
+        rospy.wait_for_service('/{}/ergoeff'.format(self.apex_name))
 
-    def run(self):
-        # rospy.wait_for_service(service)
-        # self.set_torso_compliant_srv = rospy.ServiceProxy(self.service_name_set_compliant, SetTorsoCompliant)
-        # rospy.Service(self.service_name_get, GetSensorialState, self.cb_get)
-        rospy.loginfo("Done, perception is up!")
-        rospy.spin()
 
-    @property
-    def ergo(self):
-        return self.eef_pose
+        read = rospy.ServiceProxy('/{}/ergoeff'.format(self.apex_name), Camera)
+        image = [x.data for x in read(CameraRequest()).image]
+        image = np.array(image).reshape(144, 176, 3)
+        plt.imshow(image)
+        plt.show()
 
-    # def get_eff_pose(self):
+if __name__ == "__main__":
+    camera = CameraViewer()
+    camera.show_image()
 
 
 if __name__ == '__main__':
-    ergo_eff_pose = ErgoEefPose(1)
-    time.sleep(5)
-    print(ergo_eff_pose.ergo)
+    rospy.init_node('ergoeff')
+    ErgoEefPose().run()
