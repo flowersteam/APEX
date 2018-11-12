@@ -276,8 +276,8 @@ class FILearner(object):
 
         self.m_space = list(range(m_ndims))
         self.c_dims = range(m_ndims, m_ndims + 2)
-        self.s_ergo = range(m_ndims + 2, m_ndims + 5)
-        self.s_ball = range(m_ndims + 5, m_ndims + 7)
+        self.s_ball = range(m_ndims + 2, m_ndims + 4)
+        self.s_ergo = range(m_ndims + 4, m_ndims + 7)
 
         self.ms = None
         self.mid_control = None
@@ -441,7 +441,8 @@ class FILearner(object):
 
             self.record((context_ball_center, context_arena_center, context_ergo_pos),
                         (outcome_ball_center, outcome_arena_center, outcome_ergo_pos))
-            self.perceive(context_ball_center, outcome_ball_center)
+            outcome = np.concatenate([outcome_ball_center, context_ergo_pos])
+            self.perceive(context_ball_center, outcome)
             self.save(experiment_name=self.experiment_name, task=self.babbling_mode,
                       trial=self.trial, folder="~/Documents/expe_poppimage")
 
