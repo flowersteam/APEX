@@ -6,7 +6,7 @@ from apex_playground.srv import ErgoPose, ErgoPoseResponse
 
 class ErgoEefPos(object):
     def __init__(self):
-        # self.apex_name = "apex_{}".format(n_apex)
+        self.apex_name = "apex_1"
         # self.rospack = RosPack()
         # print("Ego Eff Pose on {}".format(n_apex))
         # rospy.Subscriber(self.topics["torso_l_eef"]["topic"], self.topics["torso_l_eef"]["type"], self.cb_eef)
