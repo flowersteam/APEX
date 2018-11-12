@@ -11,8 +11,8 @@ class ErgoPos(object):
         print("ErgoPose on ", self.apex_name)
 
     def get_position(self):
-        msg = self.get_msg()
-        # msg = self.get_pos()
+        # msg = self.get_msg()
+        msg = self.get_pos(ErgoPoseRequest())
         pos = np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z])
         print(pos)
 
