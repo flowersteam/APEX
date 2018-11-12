@@ -10,7 +10,7 @@ class ErgoEefPos(object):
         # self.rospack = RosPack()
         # print("Ego Eff Pose on {}".format(n_apex))
         # rospy.Subscriber(self.topics["torso_l_eef"]["topic"], self.topics["torso_l_eef"]["type"], self.cb_eef)
-        self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
+        # self.sub = rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
         rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg)
@@ -49,4 +49,5 @@ class ErgoEefService(object):
 
 if __name__ == '__main__':
     rospy.init_node('ergoeff')
-    ErgoEefService().run()
+    ErgoEefPos().run()
+    # ErgoEefService().run()
