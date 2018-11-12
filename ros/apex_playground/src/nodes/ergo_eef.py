@@ -20,7 +20,7 @@ class ErgoEefPos(object):
         # self.set_torso_compliant_srv = rospy.ServiceProxy(self.service_name_set_compliant, SetTorsoCompliant)
         # rospy.Service(self.service_name_get, GetSensorialState, self.cb_get)
         rospy.loginfo("Done, perception is up!")
-        rospy.Subscriber("poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
+        rospy.Subscriber("/apex_1/poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
         rospy.loginfo("Done, perception is down!")
         rospy.spin()
 
