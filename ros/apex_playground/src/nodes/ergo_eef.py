@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-import numpy as np
-
 import rospy
 from geometry_msgs.msg import PoseStamped
 from apex_playground.srv import ErgoPose, ErgoPoseResponse
@@ -11,7 +9,7 @@ class ErgoEefPos(object):
         self.sub = rospy.Subscriber("poppy_ergo_jr/end_effector_pose", PoseStamped, self.cb_eef)
 
     def cb_eef(self, msg):
-        print(np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]))
+        rospy.loginfo(rospy.get_caller_id() + "I heard %s", msg.pose.position)
         self.cur_eef_pos = msg
 
     @property
