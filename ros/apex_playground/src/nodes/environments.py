@@ -35,7 +35,7 @@ class ArenaEnvironment(object):
         self.n_dmps = 6
         self.n_bfs = 7
         self.m_ndims = self.n_bfs * self.n_dmps + self.n_dmps
-        timesteps = 50
+        timesteps = 40
         max_params = np.array([300.] * self.n_bfs * self.n_dmps + [1.] * self.n_dmps)
         self.bounds_motors_max = np.array([180, 0, 30, 70, 20, 70])
         self.bounds_motors_min = np.array([-180, -40, -50, -70, -50, -50])

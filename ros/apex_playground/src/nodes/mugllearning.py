@@ -362,6 +362,13 @@ class FILearner(object):
 
         ms = self.set_ms(self.m, context_sensori)
         self.ms = ms
+
+        print(ms.shape)
+        print(self.m_space)
+        print(self.c_dims)
+        print(self.s_ergo)
+        print(self.s_ball)
+
         self.update_sensorimotor_models(ms)
         if self.mid_control is not None and self.measure_interest:
             self.modules[self.mid_control].update_im(self.modules[self.mid_control].get_m(ms),
