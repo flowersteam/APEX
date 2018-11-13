@@ -1,12 +1,9 @@
 #!/usr/bin/python
 
 import rospy
-import json
 from poppy_msgs.srv import ReachTarget, ReachTargetRequest
 from sensor_msgs.msg import JointState
 import os
-from os.path import join
-import numpy as np
 
 
 class ErgoMover(object):
@@ -17,10 +14,12 @@ class ErgoMover(object):
         service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
         rospy.wait_for_service(service)
         reach = rospy.ServiceProxy(service, ReachTarget)
-        reach_jointstate = JointState(position=point, name=["m{}".format(i) for i in range(1,7)])
+        reach_jointstate = JointState(position=point, name=["m{}".format(i) for i in range(1, 7)])
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(5))
         reach(reach_request)
+        rospy.sleep(5)
+
 
 if __name__ == "__main__":
     mover = ErgoMover()
