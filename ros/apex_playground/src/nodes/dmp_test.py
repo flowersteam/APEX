@@ -54,7 +54,7 @@ if __name__ == "__main__":
     bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
 
-    mover = ErgoDMP()
+    mover = ErgoDMP(timesteps, n_dmps)
     point = [0, 0, 0, 0, 0, 0]
     mover.move_to(list(point), duration=1)
     m = np.random.randn(dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
