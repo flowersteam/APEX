@@ -132,12 +132,12 @@ class ErgoMover(object):
     def set_compliant(self, compliant):
         self._compliant_service_prox(SetCompliantRequest(compliant=compliant))
 
-    def move_to(self, point, duration=0.1):
+    def move_to(self, point, duration=0.15):
         reach_jointstate = JointState(position=point, name=["m{}".format(i) for i in range(1, 7)])
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(duration))
         self._reach_service_prox(reach_request)
-        rospy.sleep(duration - 0.01)
+        rospy.sleep(duration - 0.05)
 
 
 class ErgoTracker(object):
