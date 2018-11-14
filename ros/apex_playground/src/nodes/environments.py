@@ -94,7 +94,7 @@ class ArenaEnvironment(object):
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
-        self.ergo_mover.move_to(list(point), duration=1.)
+        self.ergo_mover.move_to(list(point), duration=1.5)
 
     def update(self, m):
         normalized_traj = self.dmp.trajectory(m * self.max_params)
