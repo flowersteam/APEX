@@ -36,10 +36,10 @@ class ArenaEnvironment(object):
         self.n_bfs = 7
         self.m_ndims = self.n_bfs * self.n_dmps + self.n_dmps
         timesteps = 40
-        max_params = np.array([300.] * self.n_bfs * self.n_dmps + [1.] * self.n_dmps)
+        self.max_params = np.array([200.] * self.n_bfs * self.n_dmps + [1.] * self.n_dmps)
         self.bounds_motors_max = np.array([180, 0, 30, 70, 20, 70])
         self.bounds_motors_min = np.array([-180, -40, -50, -70, -50, -50])
-        self.dmp = MyDMP(n_dmps=self.n_dmps, n_bfs=self.n_bfs, timesteps=timesteps, max_params=max_params)
+        self.dmp = MyDMP(n_dmps=self.n_dmps, n_bfs=self.n_bfs, timesteps=timesteps, max_params=self.max_params)
 
         self.ball_center = None
         self.arena_center = None
@@ -48,7 +48,6 @@ class ArenaEnvironment(object):
             print("Could not find ball center, exiting.")
             import sys
             sys.exit(0)
-
 
     def get_ball_position(self):
         frame = self.camera.get_image()
@@ -95,10 +94,10 @@ class ArenaEnvironment(object):
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]
-        self.ergo_mover.move_to(list(point), duration=3)
+        self.ergo_mover.move_to(list(point), duration=2)
 
     def update(self, m):
-        normalized_traj = self.dmp.trajectory(m)
+        normalized_traj = self.dmp.trajectory(m * self.max_params)
         normalized_traj = bounds_min_max(normalized_traj, self.n_dmps * [-1.], self.n_dmps * [1.])
         traj = ((normalized_traj - np.array([-1.] * self.n_dmps)) / 2.) * (
                     self.bounds_motors_max - self.bounds_motors_min) + self.bounds_motors_min

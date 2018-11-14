@@ -289,19 +289,21 @@ class FILearner(object):
                                                   self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
-                                                                                            [1., 1.]]),
+                                                                                            [1., 1.]],
+                                                                    context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
-            print(self.modules["mod1"].context_mode['context_dims'])
         elif self.babbling_mode == "ModularFI":
             self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
-                                                                                            [1., 1.]]),
+                                                                                            [1., 1.]],
+                                                                    context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
             self.modules["mod1"] = LearningModule("mod2", self.m_space, self.c_dims + self.ball, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
-                                                                                            [1., 1.]]),
+                                                                                            [1., 1.]],
+                                                                    context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
         else:
             raise NotImplementedError
