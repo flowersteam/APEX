@@ -204,8 +204,7 @@ class MUGLLearner(object):
                 "outcome": self.outcomes[i],
                 "interests": interests}
 
-    def save(self, experiment_name, task, trial, folder="/media/usb/"):
-        print('saving')
+    def save(self, experiment_name, task, trial, folder):
         folder_trial = os.path.join(folder, experiment_name, "task_" + str(task),
                                     "condition_" + str(self.babbling_mode), "trial_" + str(trial))
         if not os.path.isdir(folder_trial):
@@ -242,7 +241,7 @@ class MUGLLearner(object):
                         (outcome_ball_center, outcome_arena_center, outcome_ergo_pos))
             self.perceive(context_img, outcome_img)
             self.save(experiment_name=self.experiment_name, task=self.babbling_mode,
-                      trial=self.trial, folder="~/Documents/expe_poppimage")
+                      trial=self.trial, folder="/home/flowers/Documents/expe_poppimage")
 
 
 class FILearner(object):
@@ -403,8 +402,7 @@ class FILearner(object):
                 "outcome": self.outcomes[i],
                 "interests": interests}
 
-    def save(self, experiment_name, task, trial, folder="/media/usb/"):
-        print('saving')
+    def save(self, experiment_name, task, trial, folder):
         folder_trial = os.path.join(folder, experiment_name, "task_" + str(task),
                                     "condition_" + str(self.babbling_mode), "trial_" + str(trial))
         if not os.path.isdir(folder_trial):
@@ -432,7 +430,7 @@ class FILearner(object):
             outcome = np.concatenate([outcome_ball_center, context_ergo_pos])
             self.perceive(context_ball_center, outcome)
             self.save(experiment_name=self.experiment_name, task=self.babbling_mode,
-                      trial=self.trial, folder="~/Documents/expe_poppimage")
+                      trial=self.trial, folder="/home/flowers/Documents/expe_poppimage")
 
 
 if __name__ == "__main__":
@@ -453,7 +451,7 @@ if __name__ == "__main__":
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
+                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
     elif "VAE" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
@@ -472,6 +470,3 @@ if __name__ == "__main__":
         raise NotImplementedError
 
     learner.explore(args.n_iter)
-
-    import sys
-    sys.exit(0)
