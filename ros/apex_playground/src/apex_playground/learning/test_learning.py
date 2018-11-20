@@ -8,7 +8,7 @@ from mugllearning import Learning
         
 if __name__ == "__main__":
 
-    render = True
+    render = False
     print("Create environment")
     environment = TestArmBallEnv()
     environment = TestArmBallsObsEnv(render=render)
@@ -29,11 +29,11 @@ if __name__ == "__main__":
         m = learning.produce(context)
         s = environment.update(m, reset=False)
         learning.perceive(s)
-        learning.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
+        learning.save(experiment_name="test", trial=0, folder="/Users/adrien/Documents/post-doc/expe_poppy/data")
     
     print()
     print("Saving current data to file")
-    learning.save(experiment_name="test", task="mge_fi", trial=0, folder="../../../../../data/test")
+    learning.save(experiment_name="test", trial=0, folder="/Users/adrien/Documents/post-doc/expe_poppy/data")
     
     print("Data before saving")
     print(learning.agent.t)
@@ -54,7 +54,8 @@ if __name__ == "__main__":
         learning.perceive(s)
     
     print("Rebuilding agent from file")
-    learning.restart_from_files(experiment_name="test", task="mge_fi", trial=0, iteration=100, folder="../../../../../data/test")
+    learning.restart_from_files(experiment_name="test", trial=0, iteration=100,
+                                folder="/Users/adrien/Documents/post-doc/expe_poppy/data")
         
     print("Data after rebuilding")
     print(learning.agent.t)

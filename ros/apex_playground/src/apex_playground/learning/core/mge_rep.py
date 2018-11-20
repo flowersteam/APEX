@@ -1,11 +1,4 @@
-import argparse
-import os
-import datetime
-import json
-import pickle
 import numpy as np
-
-from baselines import logger
 
 from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
@@ -28,6 +21,8 @@ class SupervisorRep(object):
         self.modules = {}
         self.chosen_modules = []
         self.goals = []
+        self.contexts = []
+        self.outcomes = []
         self.progresses_evolution = {}
         self.interests_evolution = {}
 
@@ -267,6 +262,9 @@ class SupervisorRep(object):
             return False
 
         context, sensori = np.hsplit(s, 2)
+        self.contexts.append(context)
+        self.outcomes.append(sensori)
+
         context_sensori = np.stack([context, sensori])
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
@@ -319,12 +317,17 @@ class SupervisorRep(object):
 
     def save_iteration(self, i):
         interests = {}
+        progresses = {}
         for mid in self.modules.keys():
             interests[mid] = np.float16(self.interests_evolution[mid][i])
+            progresses[mid] = np.float16(self.progresses_evolution[mid][i])
         return {"ms": np.array(self.ms, dtype=np.float16),
                 "chosen_module": self.chosen_modules[i],
                 "goal": self.goals[i],
-                "interests": interests}
+                "context": self.contexts[i],
+                "outcome": self.outcomes[i],
+                "interests": interests,
+                "progresses": progresses}
 
     def forward_iteration(self, data_iteration):
         ms = data_iteration["ms"]

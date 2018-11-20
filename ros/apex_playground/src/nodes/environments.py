@@ -81,6 +81,9 @@ class ArenaEnvironment(object):
 
         if ball_center is not None:
             self.ball_center = np.array(ball_center)
+            self.extracted = True
+        else:
+            self.extracted = False
         if arena_center is not None:
             self.arena_center = np.array(arena_center)
 
@@ -90,7 +93,7 @@ class ArenaEnvironment(object):
         img = self.get_ball_position()
         ergo_pos = self.ergo_tracker.get_position()
 
-        return img, self.ball_center, self.arena_center, ergo_pos
+        return img, self.ball_center, self.arena_center, ergo_pos, self.extracted
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]

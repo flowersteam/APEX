@@ -5,6 +5,7 @@ import os
 import numpy as np
 import scipy.misc
 import pickle
+import json
 
 from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
@@ -15,9 +16,64 @@ from apex_playground.learning.core.representation_pytorch import ArmBallsVAE, Ar
 from environments import ArenaEnvironment, DummyEnvironment
 
 
-class MUGLLearner(object):
+class Learner(object):
+    def motor_babbling(self):
+        # TODO: check this
+        self.m = self.modules["mod1"].motor_babbling()
+        return self.m
+
+    def choose_babbling_module(self):
+        interests = {}
+        for mid in self.modules.keys():
+            interests[mid] = self.modules[mid].interest()
+
+        idx = prop_choice(list(interests.values()), eps=self.choice_eps)
+        mid = list(interests.keys())[idx]
+        self.chosen_modules.append(mid)
+        return mid
+
+    def set_ms(self, m, s):
+        return np.array(list(m) + list(s))
+
+    def update_sensorimotor_models(self, ms):
+        for mid in self.modules.keys():
+            m = self.modules[mid].get_m(ms)
+            s = self.modules[mid].get_s(ms)
+            self.modules[mid].update_sm(m, s)
+
+    def save_iteration(self, i):
+        interests = {}
+        progresses = {}
+        for mid in self.modules.keys():
+            interests[mid] = np.float16(self.interests_evolution[mid][i])
+            progresses[mid] = np.float16(self.progresses_evolution[mid][i])
+        return {"ms": np.array(self.ms, dtype=np.float16),
+                "chosen_module": self.chosen_modules[i],
+                "goal": self.goals[i],
+                "context": self.contexts[i],
+                "outcome": self.outcomes[i],
+                "interests": interests,
+                "progresses": progresses}
+
+    def save(self, experiment_name, trial, folder):
+        folder_trial = os.path.join(folder, experiment_name, "condition_" + str(self.babbling_mode),
+                                    "trial_" + str(trial))
+        if not os.path.isdir(folder_trial):
+            os.makedirs(folder_trial)
+        iteration = self.t - 1
+        filename = "iteration_" + str(iteration) + ".pickle"
+        with open(os.path.join(folder_trial, filename), 'wb') as f:
+            pickle.dump(self.save_iteration(iteration), f)
+
+    def record(self, context, outcome):
+        self.contexts.append(context)
+        self.outcomes.append(outcome)
+
+
+class MUGLLearner(Learner):
     def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_motor_babbling=0.1,
                  explo_noise=0.05, choice_eps=0.1, debug=False):
+        super(MUGLLearner, self).__init__()
         self.debug = debug
 
         self.experiment_name = experiment_name
@@ -101,21 +157,6 @@ class MUGLLearner(object):
             self.progresses_evolution[mid] = []
             self.interests_evolution[mid] = []
 
-    def motor_babbling(self):
-        # TODO: check this
-        self.m = self.modules["mod1"].motor_babbling()
-        return self.m
-
-    def choose_babbling_module(self):
-        interests = {}
-        for mid in self.modules.keys():
-            interests[mid] = self.modules[mid].interest()
-
-        idx = prop_choice(list(interests.values()), eps=self.choice_eps)
-        mid = list(interests.keys())[idx]
-        self.chosen_modules.append(mid)
-        return mid
-
     def produce(self, context):
         if self.debug:
             # We check the reconstruction by the reprensentation
@@ -184,47 +225,10 @@ class MUGLLearner(object):
 
         return True
 
-    def set_ms(self, m, s):
-        return np.array(list(m) + list(s))
-
-    def update_sensorimotor_models(self, ms):
-        for mid in self.modules.keys():
-            m = self.modules[mid].get_m(ms)
-            s = self.modules[mid].get_s(ms)
-            self.modules[mid].update_sm(m, s)
-
-    def save_iteration(self, i):
-        interests = {}
-        progresses = {}
-        for mid in self.modules.keys():
-            interests[mid] = np.float16(self.interests_evolution[mid][i])
-            progresses[mid] = np.float16(self.progresses_evolution[mid][i])
-        return {"ms": np.array(self.ms, dtype=np.float16),
-                "chosen_module": self.chosen_modules[i],
-                "goal": self.goals[i],
-                "context": self.contexts[i],
-                "outcome": self.outcomes[i],
-                "interests": interests,
-                "progresses": progresses}
-
-    def save(self, experiment_name, task, trial, folder):
-        folder_trial = os.path.join(folder, experiment_name, "task_" + str(task),
-                                    "condition_" + str(self.babbling_mode), "trial_" + str(trial))
-        if not os.path.isdir(folder_trial):
-            os.makedirs(folder_trial)
-        iteration = self.t - 1
-        filename = "iteration_" + str(iteration) + ".pickle"
-        with open(os.path.join(folder_trial, filename), 'wb') as f:
-            pickle.dump(self.save_iteration(iteration), f)
-
-    def record(self, context, outcome):
-        self.contexts.append(context)
-        self.outcomes.append(outcome)
-
     def explore(self, n_iter):
         for _ in range(n_iter):
             self.environment.reset()
-            context_img, context_ball_center, context_arena_center, context_ergo_pos = self.environment.get_current_context()
+            context_img, context_ball_center, context_arena_center, context_ergo_pos, context_extracted = self.environment.get_current_context()
 
             left = int((context_img.shape[0] - 128) / 2)
             top = int((context_img.shape[1] - 128) / 2)
@@ -236,20 +240,21 @@ class MUGLLearner(object):
 
             m = self.produce(context_img)
 
-            outcome_img, outcome_ball_center, outcome_arena_center, outcome_ergo_pos = self.environment.update(m)
+            outcome_img, outcome_ball_center, outcome_arena_center, outcome_ergo_pos, outcome_extracted = self.environment.update(m)
             outcome_img = outcome_img[left:left + width, top:top + height]
             outcome_img = scipy.misc.imresize(outcome_img, (64, 64, 3))
 
-            self.record((context_ball_center, context_arena_center, context_ergo_pos),
-                        (outcome_ball_center, outcome_arena_center, outcome_ergo_pos))
+            self.record((context_ball_center, context_arena_center, context_ergo_pos, context_extracted),
+                        (outcome_ball_center, outcome_arena_center, outcome_ergo_pos, outcome_extracted))
             self.perceive(context_img, outcome_img)
-            self.save(experiment_name=self.experiment_name, task=self.babbling_mode,
-                      trial=self.trial, folder="/home/flowers/Documents/expe_poppimage")
+            self.save(experiment_name=self.experiment_name, trial=self.trial,
+                      folder="/home/flowers/Documents/expe_poppimage")
 
 
-class FILearner(object):
+class FILearner(Learner):
     def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_motor_babbling=0.1,
                  explo_noise=0.05, choice_eps=0.1, debug=False):
+        super(FILearner, self).__init__()
         self.debug = debug
 
         self.experiment_name = experiment_name
@@ -314,21 +319,6 @@ class FILearner(object):
             self.progresses_evolution[mid] = []
             self.interests_evolution[mid] = []
 
-    def motor_babbling(self):
-        # TODO: check this
-        self.m = self.modules["mod1"].motor_babbling()
-        return self.m
-
-    def choose_babbling_module(self):
-        interests = {}
-        for mid in self.modules.keys():
-            interests[mid] = self.modules[mid].interest()
-
-        idx = prop_choice(list(interests.values()), eps=self.choice_eps)
-        mid = list(interests.keys())[idx]
-        self.chosen_modules.append(mid)
-        return mid
-
     def produce(self, context):
         if np.random.random() < self.n_motor_babbling:
             self.mid_control = None
@@ -385,58 +375,21 @@ class FILearner(object):
 
         return True
 
-    def set_ms(self, m, s):
-        return np.array(list(m) + list(s))
-
-    def update_sensorimotor_models(self, ms):
-        for mid in self.modules.keys():
-            m = self.modules[mid].get_m(ms)
-            s = self.modules[mid].get_s(ms)
-            self.modules[mid].update_sm(m, s)
-
-    def save_iteration(self, i):
-        interests = {}
-        progresses = {}
-        for mid in self.modules.keys():
-            interests[mid] = np.float16(self.interests_evolution[mid][i])
-            progresses[mid] = np.float16(self.progresses_evolution[mid][i])
-        return {"ms": np.array(self.ms, dtype=np.float16),
-                "chosen_module": self.chosen_modules[i],
-                "goal": self.goals[i],
-                "context": self.contexts[i],
-                "outcome": self.outcomes[i],
-                "interests": interests,
-                "progresses": progresses}
-
-    def save(self, experiment_name, task, trial, folder):
-        folder_trial = os.path.join(folder, experiment_name, "task_" + str(task),
-                                    "condition_" + str(self.babbling_mode), "trial_" + str(trial))
-        if not os.path.isdir(folder_trial):
-            os.makedirs(folder_trial)
-        iteration = self.t - 1
-        filename = "iteration_" + str(iteration) + ".pickle"
-        with open(os.path.join(folder_trial, filename), 'wb') as f:
-            pickle.dump(self.save_iteration(iteration), f)
-
-    def record(self, context, outcome):
-        self.contexts.append(context)
-        self.outcomes.append(outcome)
-
     def explore(self, n_iter):
         for _ in range(n_iter):
             self.environment.reset()
-            _, context_ball_center, context_arena_center, context_ergo_pos = self.environment.get_current_context()
+            _, context_ball_center, context_arena_center, context_ergo_pos, context_extracted = self.environment.get_current_context()
 
             m = self.produce(context_ball_center)
 
-            _, outcome_ball_center, outcome_arena_center, outcome_ergo_pos = self.environment.update(m)
+            _, outcome_ball_center, outcome_arena_center, outcome_ergo_pos, outcome_extracted = self.environment.update(m)
 
-            self.record((context_ball_center, context_arena_center, context_ergo_pos),
-                        (outcome_ball_center, outcome_arena_center, outcome_ergo_pos))
+            self.record((context_ball_center, context_arena_center, context_ergo_pos, context_extracted),
+                        (outcome_ball_center, outcome_arena_center, outcome_ergo_pos, outcome_extracted))
             outcome = np.concatenate([outcome_ball_center, context_ergo_pos])
             self.perceive(context_ball_center, outcome)
-            self.save(experiment_name=self.experiment_name, task=self.babbling_mode,
-                      trial=self.trial, folder="/home/flowers/Documents/expe_poppimage")
+            self.save(experiment_name=self.experiment_name, trial=self.trial,
+                      folder="/home/flowers/Documents/expe_poppimage")
 
 
 if __name__ == "__main__":
@@ -448,6 +401,14 @@ if __name__ == "__main__":
     parser.add_argument('--n_iter', metavar='-n', type=int, help='Number of exploration iterations')
     parser.add_argument('--n_modules', type=int, default=5, help='Number of modules for MUGL learning')
     args = parser.parse_args()
+
+    folder_trial = os.path.join("/home/flowers/Documents/expe_poppimage",
+                                args.exp_name, "condition_" + args.babbling,
+                                "trial_" + str(args.trial))
+    if not os.path.isdir(folder_trial):
+        os.makedirs(folder_trial)
+    with open(os.path.join(folder_trial, 'config.json'), 'w') as f:
+        json.dump(vars(args), f, separators=(',\n', ': '))
 
     environment = ArenaEnvironment(args.apex, debug=False)
 

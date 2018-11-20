@@ -1,9 +1,6 @@
 import os
 import pickle
 import matplotlib.pyplot as plt
-import numpy as np
-import time
-import datetime
 
 from core.mge_fi import SupervisorFI
 from core.mge_rep import SupervisorRep
@@ -48,9 +45,9 @@ class Learning(object):
             data = pickle.load(f)
         return data
                 
-    def save(self, experiment_name, task, trial, folder="/media/usb/"):
+    def save(self, experiment_name, trial, folder="/media/usb/"):
         if self.agent is not None:
-            folder_trial = os.path.join(folder, experiment_name, "task_" + str(task), "condition_" + str(self.condition), "trial_" + str(trial))
+            folder_trial = os.path.join(folder, experiment_name, "condition_" + str(self.condition), "trial_" + str(trial))
             if not os.path.isdir(folder_trial):
                 os.makedirs(folder_trial)
             iteration = self.get_iterations() - 1
@@ -87,9 +84,9 @@ class Learning(object):
         else:
             raise NotImplementedError
     
-    def restart_from_files(self, experiment_name, task, trial, iteration, folder="/media/usb/"):
+    def restart_from_files(self, experiment_name, trial, iteration, folder="/media/usb/"):
         self.start()
-        folder_trial = os.path.join(folder, experiment_name, "task_" + str(task), "condition_" + str(self.condition), "trial_" + str(trial))
+        folder_trial = os.path.join(folder, experiment_name, "condition_" + str(self.condition), "trial_" + str(trial))
         for it in range(iteration):
             filename = "iteration_" + str(it) + ".pickle"
             data = self.get_data_from_file(os.path.join(folder_trial, filename))
