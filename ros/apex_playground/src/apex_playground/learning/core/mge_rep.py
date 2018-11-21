@@ -167,14 +167,10 @@ class SupervisorRep(object):
         if np.random.random() < self.n_motor_babbling:
             self.mid_control = None
             self.chosen_modules.append("motor_babbling")
-            # TODO: install rospy
-            # rospy.loginfo("Random Motor Babbling")
             return self.motor_babbling()
         else:
             mid = self.choose_babbling_module()
             self.mid_control = mid
-            # TODO: install rospy
-            # rospy.loginfo("Chosen module: {}".format(mid))
 
             explore = True
             self.measure_interest = False

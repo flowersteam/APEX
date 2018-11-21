@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 import scipy.misc
 import numpy as np
+import datetime
 
 from explauto.utils import bounds_min_max
 from rospkg import RosPack
@@ -65,12 +66,13 @@ class ArenaEnvironment(object):
 
         if self.debug:
             frame = self.ball_tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
-            scipy.misc.imsave('/home/flowers/Documents/tests/frame.jpeg', frame)
-            scipy.misc.imsave('/home/flowers/Documents/tests/img.jpeg', img)
-            plt.imshow(frame)
-            plt.show()
-            import time
-            time.sleep(1)
+            time = datetime.datetime.now()
+            scipy.misc.imsave('/home/flowers/Documents/tests/processed_{}.jpeg'.format(time), frame)
+            scipy.misc.imsave('/home/flowers/Documents/tests/raw_{}.jpeg'.format(time), img)
+            # plt.imshow(frame)
+            # plt.show()
+            # import time
+            # time.sleep(1)
 
             # image = Float32MultiArray()
             # for dim in range(len(frame.shape)):
@@ -86,14 +88,18 @@ class ArenaEnvironment(object):
             self.extracted = False
         if arena_center is not None:
             self.arena_center = np.array(arena_center)
+        else:
+            self.extracted = False
 
         return img
 
     def get_current_context(self):
         img = self.get_ball_position()
         ergo_pos = self.ergo_tracker.get_position()
+        elongation, theta = self.ball_tracking.get_state(self.ball_center, self.arena_center)
+        ball_state = np.array([elongation, theta])
 
-        return img, self.ball_center, self.arena_center, ergo_pos, self.extracted
+        return img, self.ball_center, self.arena_center, ergo_pos, ball_state, self.extracted
 
     def reset(self):
         point = [0, 0, 0, 0, 0, 0]

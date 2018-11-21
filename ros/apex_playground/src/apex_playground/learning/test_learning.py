@@ -7,6 +7,7 @@ from mugllearning import Learning
 
         
 if __name__ == "__main__":
+    # np.random.seed(0)
 
     render = False
     print("Create environment")

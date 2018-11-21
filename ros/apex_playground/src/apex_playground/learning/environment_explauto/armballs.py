@@ -528,8 +528,6 @@ class TestArmBallsEnv(ContextEnvironment):
 
         ContextEnvironment.__init__(self, env_cls, env_conf, context_mode)
 
-    def torsodemo2m(self, m_traj): return self.env.torsodemo2m(m_traj)
-
 
 class TestNCArmBallsObsEnv(Environment):
     def __init__(self, m_mins, m_maxs, s_mins, s_maxs, render=False, render_interval=100):
@@ -541,7 +539,7 @@ class TestNCArmBallsObsEnv(Environment):
 
         # Env
         self.render = render
-        self.env = MyArmBallsObserved(arm_lengths=np.array([0.5, 0.3, 0.2]), object_size=0.1, n_rbf=5,
+        self.env = MyArmBallsObserved(arm_lengths=np.array([0.5, 0.3, 0.2]), object_size=0.1, n_rbf=5, render_arm=False,
                                       width=64, height=64, stochastic=True, render=render, render_interval=render_interval)
         self.env.reset()
 
@@ -591,8 +589,6 @@ class TestArmBallsObsEnv(ContextEnvironment):
                             context_sensory_bounds=[[-2.5] * 10, [2.5] * 10])
 
         ContextEnvironment.__init__(self, env_cls, env_conf, context_mode)
-
-    def torsodemo2m(self, m_traj): return self.env.torsodemo2m(m_traj)
 
 
 if __name__ == '__main__':

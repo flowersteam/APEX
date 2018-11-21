@@ -1,11 +1,10 @@
 #!/usr/bin/python
 
-import argparse
 import os
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.misc
 import pickle
-import json
 from tqdm import tqdm
 
 from explauto.utils import prop_choice
@@ -14,7 +13,7 @@ from explauto.utils.config import make_configuration
 from apex_playground.learning.core.learning_module import LearningModule
 from apex_playground.learning.core.representation_pytorch import ArmBallsVAE, ArmBallsBetaVAE
 
-from environments import ArenaEnvironment, DummyEnvironment
+from apex_playground.learning.environment_explauto.armballs import TestArmBallsEnv, TestArmBallsObsEnv
 
 
 class Learner(object):
@@ -34,8 +33,6 @@ class Learner(object):
         self.ms = None
         self.mid_control = None
         self.measure_interest = False
-
-        self.save_folder = "/home/flowers/Documents/expe_poppimage"
 
     def motor_babbling(self):
         # TODO: check this
@@ -70,8 +67,6 @@ class Learner(object):
         return {"ms": np.array(self.ms, dtype=np.float16),
                 "chosen_module": self.chosen_modules[i],
                 "goal": self.goals[i],
-                "context": self.contexts[i],
-                "outcome": self.outcomes[i],
                 "interests": interests,
                 "progresses": progresses}
 
@@ -88,6 +83,32 @@ class Learner(object):
     def record(self, context, outcome):
         self.contexts.append(context)
         self.outcomes.append(outcome)
+
+    def plot_interest_evolution(self):
+        fig, ax = plt.subplots()
+        data = np.transpose(
+            np.array([self.interests_evolution[mid] for mid in ["mod0", "mod1", "mod2", "mod3", "mod4"]]))
+        ax.plot(data, lw=2)
+        if "VAE" in self.babbling_mode:
+            ax.legend(["mod0", "mod1", "mod2", "mod3", "mod4"], ncol=3)
+        else:
+            ax.legend(["Arm", "Ball"], ncol=3)
+        ax.set_xlabel('Time steps', fontsize=20)
+        ax.set_ylabel('Interest', fontsize=20)
+        plt.show(block=True)
+
+    def plot_progress_evolution(self):
+        fig, ax = plt.subplots()
+        data = np.transpose(
+            np.array([self.progresses_evolution[mid] for mid in ["mod0", "mod1", "mod2", "mod3", "mod4"]]))
+        ax.plot(data, lw=2)
+        if "VAE" in self.babbling_mode:
+            ax.legend(["mod0", "mod1", "mod2", "mod3", "mod4"], ncol=3)
+        else:
+            ax.legend(["Arm", "Ball"], ncol=3)
+        ax.set_xlabel('Time steps', fontsize=20)
+        ax.set_ylabel('Progress', fontsize=20)
+        plt.show(block=True)
 
 
 class MUGLLearner(Learner):
@@ -140,7 +161,7 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE":
             self.representation = ArmBallsBetaVAE
-            self.representation.sorted_latents = np.array(range(10))
+            self.representation.sorted_latents = np.array([9, 4, 1, 7, 6, 8, 2, 3, 0, 5])
             # Create one module per two latents
             for i in range(n_modules):
                 module_id = "mod" + str(i)
@@ -211,6 +232,9 @@ class MUGLLearner(Learner):
         # if self.ball_moves(s[92:112]):
         #     rospy.sleep(5)
 
+        context = np.array(context)
+        outcome = np.array(outcome)
+
         context_sensori = np.stack([context, outcome])
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
@@ -237,32 +261,20 @@ class MUGLLearner(Learner):
     def explore(self, n_iter):
         for _ in tqdm(range(n_iter)):
             self.environment.reset()
-            c_img, c_ball_center, c_arena_center, c_ergo_pos, _, c_extracted = self.environment.get_current_context()
+            context_img = self.environment.get_current_context()
 
-            c_img = self.preprocess_image(c_img)
-            m = self.produce(c_img)
+            m = self.produce(context_img)
 
-            o_img, o_ball_center, o_arena_center, o_ergo_pos, _, o_extracted = self.environment.update(m)
-            o_img = self.preprocess_image(o_img)
+            self.environment.update(m, reset=False)
+            outcome_img = self.environment.get_current_context()
 
-            self.record((c_ball_center, c_arena_center, c_ergo_pos, c_extracted),
-                        (o_ball_center, o_arena_center, o_ergo_pos, o_extracted))
-            self.perceive(c_img, o_img)
-            self.save(experiment_name=self.experiment_name, trial=self.trial, folder=self.save_folder)
-
-    def preprocess_image(self, image):
-        left = int((image.shape[0] - 128) / 2)
-        top = int((image.shape[1] - 128) / 2)
-        width = 128
-        height = 128
-
-        image = image[left:left + width, top:top + height]
-        image = scipy.misc.imresize(image, (64, 64, 3))
-        return image
+            self.perceive(context_img, outcome_img)
+            self.save(experiment_name=self.experiment_name, trial=self.trial,
+                      folder="/Users/adrien/Documents/post-doc/expe_poppy/data")
 
 
 class FILearner(Learner):
-    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_motor_babbling=0.1,
+    def __init__(self, config, environment, babbling_mode, experiment_name, trial, n_motor_babbling=0.1,
                  explo_noise=0.05, choice_eps=0.1, debug=False):
         super(FILearner, self).__init__()
         self.debug = debug
@@ -278,8 +290,6 @@ class FILearner(Learner):
 
         self.conf = make_configuration(**config)
 
-        self.n_modules = n_modules
-
         # Define motor and sensory spaces:
         m_ndims = self.conf.m_ndims  # number of motor parameters
 
@@ -287,6 +297,10 @@ class FILearner(Learner):
         self.c_dims = range(m_ndims, m_ndims + 2)
         self.s_ball = range(m_ndims + 2, m_ndims + 4)
         self.s_ergo = range(m_ndims + 4, m_ndims + 7)
+
+        self.ms = None
+        self.mid_control = None
+        self.measure_interest = False
 
         # Create the learning modules:
         if self.babbling_mode == "FlatFI" or self.babbling_mode == "RandomMotor":
@@ -374,63 +388,36 @@ class FILearner(Learner):
         return True
 
     def explore(self, n_iter):
-        for _ in range(n_iter):
+        for _ in tqdm(range(n_iter)):
             self.environment.reset()
-            _, c_ball_center, c_arena_center, c_ergo_pos, c_ball_state, c_extracted = self.environment.get_current_context()
+            _, context_ball_center, context_arena_center, context_ergo_pos, context_extracted = self.environment.get_current_context()
 
-            m = self.produce(c_ball_state)
+            m = self.produce(context_ball_center)
 
-            _, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.update(m)
+            _, outcome_ball_center, outcome_arena_center, outcome_ergo_pos, outcome_extracted = self.environment.update(m)
 
-            self.record((c_ball_center, c_arena_center, c_ergo_pos, c_extracted),
-                        (o_ball_center, o_arena_center, o_ergo_pos, o_extracted))
-            outcome = np.concatenate([o_ball_state, c_ergo_pos])
-            self.perceive(c_ball_state, outcome)
-            self.save(experiment_name=self.experiment_name, trial=self.trial, folder=self.save_folder)
+            self.record((context_ball_center, context_arena_center, context_ergo_pos, context_extracted),
+                        (outcome_ball_center, outcome_arena_center, outcome_ergo_pos, outcome_extracted))
+            outcome = np.concatenate([outcome_ball_center, context_ergo_pos])
+            self.perceive(context_ball_center, outcome)
+            self.save(experiment_name=self.experiment_name, trial=self.trial,
+                      folder="/Users/adrien/Documents/post-doc/expe_poppy/data")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Perform mugl learning.')
-    parser.add_argument('--exp_name', type=str, help='Experiment name (part of path to save data)')
-    parser.add_argument('--babbling', type=str, help='Babbling mode')
-    parser.add_argument('--apex', metavar='-a', type=int, help='Ergo arena where to perform experience')
-    parser.add_argument('--trial', type=int, help='Trial number')
-    parser.add_argument('--n_iter', metavar='-n', type=int, help='Number of exploration iterations')
-    parser.add_argument('--n_modules', type=int, default=5, help='Number of modules for MUGL learning')
-    args = parser.parse_args()
+    # np.random.seed(0)
 
-    folder_trial = os.path.join("/home/flowers/Documents/expe_poppimage",
-                                args.exp_name, "condition_" + args.babbling,
-                                "trial_" + str(args.trial))
-    if not os.path.isdir(folder_trial):
-        os.makedirs(folder_trial)
-    with open(os.path.join(folder_trial, 'config.json'), 'w') as f:
-        json.dump(vars(args), f, separators=(',\n', ': '))
+    render = False
+    print("Create environment")
+    environment = TestArmBallsObsEnv(render=render)
 
-    environment = ArenaEnvironment(args.apex, debug=False)
+    config = dict(m_mins=environment.conf.m_mins,
+                  m_maxs=environment.conf.m_maxs,
+                  s_mins=[-2.5] * 20,
+                  s_maxs=[2.5] * 20)
+    learner = MUGLLearner(config, environment, babbling_mode="MGEBetaVAE", n_modules=5, explo_noise=0.01,
+                          choice_eps=0.1, experiment_name="test", trial=0, debug=False)
 
-    if args.babbling == "RandomMotor":
-        config = dict(m_mins=[-1.] * environment.m_ndims,
-                      m_maxs=[1.] * environment.m_ndims,
-                      s_mins=[-2.5] * 20,
-                      s_maxs=[2.5] * 20)
-        learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
-    elif "VAE" in args.babbling:
-        config = dict(m_mins=[-1.] * environment.m_ndims,
-                      m_maxs=[1.] * environment.m_ndims,
-                      s_mins=[-2.5] * 20,
-                      s_maxs=[2.5] * 20)
-        learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              experiment_name=args.exp_name, trial=args.trial, debug=False)
-    elif "FI" in args.babbling:
-        config = dict(m_mins=[-1.] * environment.m_ndims,
-                      m_maxs=[1.] * environment.m_ndims,
-                      s_mins=[-1] * 7,
-                      s_maxs=[1] * 7)
-        learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
-    else:
-        raise NotImplementedError
-
-    learner.explore(args.n_iter)
+    learner.explore(10000)
+    learner.plot_interest_evolution()
+    # learner.plot_progress_evolution()
