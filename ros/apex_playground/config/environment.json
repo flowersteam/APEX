@@ -1,6 +1,6 @@
 {
   "tracking": {
-    "resolution" : [352, 288],
+    "resolution" : [176, 144],
     "ball" : {
       "lower": [27, 45, 70],
       "upper": [38, 255, 255]
