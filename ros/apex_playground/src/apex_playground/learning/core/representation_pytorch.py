@@ -21,8 +21,12 @@ class Flatten(nn.Module):
 
 
 class Channelize(nn.Module):
+    def __init__(self, n_channels):
+        super(Channelize, self).__init__()
+        self.n_channels = n_channels
+
     def forward(self, input):
-        return input.view(input.size(0), 32, 4, 4)
+        return input.view(input.size(0), self.n_channels, 4, 4)
 
 
 class BetaVAE(nn.Module):
@@ -94,10 +98,40 @@ class BetaVAE(nn.Module):
                     nn.ReLU(),
                     nn.Linear(256, 4 * 4 * 32),
                     nn.ReLU(),
-                    Channelize(),
+                    Channelize(n_channels=32),
                     nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 8, 8
                     nn.ReLU(),
                     nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 16, 16
+                    nn.ReLU(),
+                    nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 32, 32
+                    nn.ReLU(),
+                    nn.ConvTranspose2d(32, self.n_channels, kernel_size=4, stride=2, padding=1)  # b, n_channels, 64, 64
+            )
+
+        if type == 'darlacnn':
+            # Works only for 1 * 64 * 64 images
+            self.encoder = nn.Sequential(
+                    nn.Conv2d(self.n_channels, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 32, 32
+                    nn.ReLU(),
+                    nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 16, 16
+                    nn.ReLU(),
+                    nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),  # b, 64, 8, 8
+                    nn.ReLU(),
+                    nn.Conv2d(64, 64, kernel_size=4, stride=2, padding=1),  # b, 64, 4, 4
+                    nn.ReLU(),
+                    Flatten(),
+                    nn.Linear(64 * 4 * 4, 256),
+                    nn.ReLU(),
+                    nn.Linear(256, 2 * self.n_latents)
+            )
+
+            self.decoder = nn.Sequential(
+                    nn.Linear(self.n_latents, 4 * 4 * 64),
+                    nn.ReLU(),
+                    Channelize(n_channels=64),
+                    nn.ConvTranspose2d(64, 64, kernel_size=4, stride=2, padding=1),  # b, 32, 8, 8
+                    nn.ReLU(),
+                    nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 16, 16
                     nn.ReLU(),
                     nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 32, 32
                     nn.ReLU(),
@@ -128,7 +162,7 @@ class BetaVAE(nn.Module):
                     nn.ReLU(),
                     nn.Linear(256, 4 * 4 * 32),
                     nn.ReLU(),
-                    Channelize(),
+                    Channelize(n_channels=32),
                     nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 8, 8
                     nn.ReLU(),
                     nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1),  # b, 32, 16, 16
@@ -305,6 +339,9 @@ class BetaVAE(nn.Module):
         elif self.network_type == 'cnn':
             height = 64
             width = 64
+        elif self.network_type == 'darlacnn':
+            height = 64
+            width = 64
         elif self.network_type == 'cnn128':
             height = 128
             width = 128
@@ -349,12 +386,17 @@ class BetaVAE(nn.Module):
             width = int(img.size()[1] ** 0.5)
         elif self.network_type == 'cnn':
             # img = Variable(torch.from_numpy(img).float()).contiguous().view(1, self.n_channels, 64, 64)
-            img = Variable(torch.from_numpy(img).float()).unsqueeze(0) # .permute(0, 2, 3, 1)
+            img = Variable(torch.from_numpy(img).float()).unsqueeze(0)  # .permute(0, 2, 3, 1)
+            height = 64
+            width = 64
+        elif self.network_type == 'darlacnn':
+            # img = Variable(torch.from_numpy(img).float()).contiguous().view(1, self.n_channels, 64, 64)
+            img = Variable(torch.from_numpy(img).float()).unsqueeze(0)  # .permute(0, 2, 3, 1)
             height = 64
             width = 64
         elif self.network_type == 'cnn128':
             # img = Variable(torch.from_numpy(img).float()).contiguous().view(1, self.n_channels, 128, 128)
-            img = Variable(torch.from_numpy(img).float()).unsqueeze(0) # .permute(0, 2, 3, 1)
+            img = Variable(torch.from_numpy(img).float()).unsqueeze(0)  # .permute(0, 2, 3, 1)
             height = 128
             width = 128
 
@@ -783,14 +825,43 @@ class PytorchBetaVAERepresentation(object):
         self.sorted_latents = indices.cpu().detach().numpy()
 
 
+# Armballs representations
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/ArmBalls_rgb_BallDistract_ent'
 ArmBallsVAE = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
                                            n_channels=3, height=64, width=64)
 ArmBallsVAE.load_model(model_path)
+
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/ArmBalls_rgb_BallDistract'
 ArmBallsBetaVAE = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
                                                n_channels=3, height=64, width=64)
 ArmBallsBetaVAE.load_model(model_path)
+
+# Poppy representations
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_ent'
+PoppimageVAE10 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
+                                               n_channels=3, height=64, width=64, batch_size=256)
+PoppimageVAE10.load_model(model_path)
+PoppimageVAE10.representation.sorted_latents = np.array([1, 2, 8, 3, 6, 5, 4, 0, 7, 9])
+
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B10_C25_D800'
+Poppimage10_B10_C25_D800 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
+                                                        n_channels=3, height=64, width=64, batch_size=256)
+Poppimage10_B10_C25_D800.load_model(model_path)
+Poppimage10_B10_C25_D800.representation.sorted_latents = np.array([7, 6, 5, 1, 9, 3, 8, 4, 2, 0])
+
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B15_C30_D300'
+Poppimage20_B15_C30_D300 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
+                                                        n_channels=3, height=64, width=64, batch_size=256)
+Poppimage20_B15_C30_D300.load_model(model_path)
+Poppimage10_B10_C25_D800.representation.sorted_latents = np.array([17, 5, 18, 11, 14, 0, 9, 13, 16, 10,
+                                                                   1, 3, 12, 6, 2, 7, 15, 19,  8,  4])
+
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B15_C50_D300'
+Poppimage20_B15_C50_D300 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
+                                                        n_channels=3, height=64, width=64, batch_size=256)
+Poppimage20_B15_C50_D300.load_model(model_path)
+Poppimage10_B10_C25_D800.representation.sorted_latents = np.array([0, 15, 12, 7, 18, 8, 5, 19, 13, 14,
+                                                                   6, 9, 16, 10, 3, 4, 11, 17, 1, 2])
 
 
 if __name__ == '__main__':
@@ -814,3 +885,17 @@ if __name__ == '__main__':
                                        visdom_record=False, visdom_env="test", log_interval=1)
     rep.reset(X_train=outcomes_train, y_train=outcomes_train, typical_img=outcomes_train[0])
     print('PytorchBetaVAERepresentation working')
+
+    # Estimations of KLD of poppimage representations
+    import scipy.misc
+    # We load the images
+    img_path = "poppy_uniform_cropped"
+    images = os.listdir(img_path)
+    data = np.zeros((len(images), 64, 64, 3), dtype=np.float32)
+    for i, img in enumerate(images):
+        data[i] = scipy.misc.imresize(scipy.misc.imread("{}/{}".format(img_path, img)), (64, 64, 3))
+    data = data / data.max()
+    representations = [PoppimageVAE10, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300]
+    for rep in representations:
+        rep.estimate_kld(data, data)
+        print(rep.sorted_latents)
