@@ -2,6 +2,7 @@
 
 import argparse
 import rospy
+from rospkg import RosPack
 from poppy_msgs.srv import ReachTarget, ReachTargetRequest, SetCompliant, SetCompliantRequest
 from sensor_msgs.msg import JointState
 import os
@@ -39,6 +40,7 @@ class ErgoDMP(object):
 
 class PosExtractor(object):
     def __init__(self, apex):
+        self.rospack = RosPack()
         with open(os.path.join(self.rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
             self.params = json.load(f)
         self.params['tracking']['ball']['lower'] = tuple(self.params['tracking']['ball']['lower'])
