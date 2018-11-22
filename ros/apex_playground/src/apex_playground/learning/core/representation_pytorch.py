@@ -760,18 +760,6 @@ class PytorchBetaVAERepresentation(object):
             self._update_prediction(data_loader)
             self._update_representation(data_loader)
 
-    def terminate(self):
-
-        self._batch_size = None
-        self._initial_epochs = None
-        self._net_epochs = None
-        self.prediction = None
-        self.performance = None
-        self.representation = None
-        self.kld_latents = None
-        self.sorted_latents = None
-        torch.cuda.empty_cache()
-
     @property
     def dataset(self):
 

@@ -226,10 +226,13 @@ class MUGLLearner(Learner):
             self.interests_evolution[mid] = []
 
     def produce(self, context):
+        # Normalize data
+        context = np.array(context) / 249.0
+
         if self.debug:
-            # We check the reconstruction by the reprensentation
-            self.representation.act(X_pred=np.array(context))
-            reconstruction = self.representation.prediction[0].transpose(2, 0, 1)
+            # We check the reconstruction by the representation
+            self.representation.act(X_pred=context)
+            reconstruction = self.representation.prediction[0].transpose(1, 2, 0)
             scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
             scipy.misc.imsave('/home/flowers/Documents/tests/reconstruction' + str(self.t) + '.jpeg', reconstruction)
 
@@ -259,19 +262,24 @@ class MUGLLearner(Learner):
             if self.modules[mid].context_mode is None:
                 self.m = self.modules[mid].produce(explore=explore)
             else:
-                self.representation.act(X_pred=np.array(context))
+                self.representation.act(X_pred=context)
                 context = self.representation.representation.ravel()
                 self.m = self.modules[mid].produce(context=context[self.modules[mid].context_mode["context_dims"]],
                                                    explore=explore)
             return self.m
 
     def perceive(self, context, outcome):
-        # print("perceive len(s)", len(s), s[92:112])
-        # TODO: Check if necessary
-        # if self.ball_moves(s[92:112]):
-        #     rospy.sleep(5)
-
+        # Normalize data
+        context = np.array(context) / 249.0
+        outcome = np.array(context) / 249.0
         context_sensori = np.stack([context, outcome])
+
+        if self.debug:
+            # We check the reconstruction by the representation
+            self.representation.act(X_pred=context_sensori)
+            reconstruction = self.representation.prediction[0].transpose(1, 2, 0)
+            scipy.misc.imsave('/home/flowers/Documents/tests/context_sensori' + str(self.t) + '.jpeg', reconstruction)
+
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
 
