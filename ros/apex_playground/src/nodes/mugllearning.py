@@ -120,7 +120,6 @@ class MUGLLearner(Learner):
         # Create the learning modules:
         if self.babbling_mode == "MGEVAE10":
             self.representation = PoppimageVAE10
-            self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):
                 module_id = "mod" + str(i)
@@ -140,7 +139,6 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEVAE20":
             self.representation = PoppimageVAE20
-            self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):
                 module_id = "mod" + str(i)
@@ -160,7 +158,6 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE10":
             self.representation = Poppimage10_B10_C25_D800
-            self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):
                 module_id = "mod" + str(i)
@@ -180,7 +177,6 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE20C30":
             self.representation = Poppimage20_B15_C30_D300
-            self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):
                 module_id = "mod" + str(i)
@@ -200,7 +196,6 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE20C50":
             self.representation = Poppimage20_B15_C50_D300
-            self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):
                 module_id = "mod" + str(i)
