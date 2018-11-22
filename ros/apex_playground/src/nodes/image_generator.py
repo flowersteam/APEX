@@ -88,7 +88,7 @@ if __name__ == "__main__":
     parser.add_argument('--path', metavar='-p', type=str, help='path to save images')
     parser.add_argument('--apex', metavar='-a', type=int, help='ergo number')
     parser.add_argument('--n-iter', metavar='-n', type=int, help='number of images to take')
-    parser.add_argument('--save-data', type=int, help='whether to save positional data also')
+    parser.add_argument('--save-pos', type=int, help='whether to save positional data also')
     args = parser.parse_args()
 
     position_extractor = PosExtractor(args.apex)
