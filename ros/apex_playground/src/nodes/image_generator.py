@@ -100,7 +100,7 @@ if __name__ == "__main__":
     n_dmps = 6
     n_bfs = 7
     timesteps = 30
-    max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
+    max_params = np.array([200.] * n_bfs * n_dmps + [1.] * n_dmps)
     bounds_motors_max = np.array([180, 0, 30, 70, 20, 70])
     bounds_motors_min = np.array([-180, 0, -20, -70, 0, 0])
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
             # filename = '{}-{}'.format(args.apex, datetime.datetime.now())
             filename = '{}-{}'.format(args.apex, i)
             scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
-            if args.save_data:
+            if args.save_pos:
                 data = {"m": np.array(traj, dtype=np.float16),
                          "ball": np.array(ball_center, dtype=np.float16),
                          "ergo": np.array(ergo_position)}
