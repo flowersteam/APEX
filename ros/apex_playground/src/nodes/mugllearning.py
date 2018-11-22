@@ -12,7 +12,7 @@ from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
 
 from apex_playground.learning.core.learning_module import LearningModule
-from apex_playground.learning.core.representation_pytorch import ArmBallsVAE, ArmBallsBetaVAE
+from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300
 
 from environments import ArenaEnvironment, DummyEnvironment
 
@@ -118,8 +118,8 @@ class MUGLLearner(Learner):
         self.s_latents = list(range(m_ndims + latents_ndims, m_ndims + 2 * latents_ndims))
 
         # Create the learning modules:
-        if self.babbling_mode == "MGEVAE":
-            self.representation = ArmBallsVAE
+        if self.babbling_mode == "MGEVAE10":
+            self.representation = PoppimageVAE10
             self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):
@@ -138,8 +138,68 @@ class MUGLLearner(Learner):
                                                               [2.5] * (self.representation.n_latents // n_modules)]),
                                         explo_noise=self.explo_noise)
                 self.modules[module_id] = module
-        elif self.babbling_mode == "MGEBetaVAE":
-            self.representation = ArmBallsBetaVAE
+        elif self.babbling_mode == "MGEVAE20":
+            self.representation = PoppimageVAE20
+            self.representation.sorted_latents = np.array(range(10))
+            # Create one module per two latents
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
+        elif self.babbling_mode == "MGEBetaVAE10":
+            self.representation = Poppimage10_B10_C25_D800
+            self.representation.sorted_latents = np.array(range(10))
+            # Create one module per two latents
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
+        elif self.babbling_mode == "MGEBetaVAE20C30":
+            self.representation = Poppimage20_B15_C30_D300
+            self.representation.sorted_latents = np.array(range(10))
+            # Create one module per two latents
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
+        elif self.babbling_mode == "MGEBetaVAE20C50":
+            self.representation = Poppimage20_B15_C50_D300
             self.representation.sorted_latents = np.array(range(10))
             # Create one module per two latents
             for i in range(n_modules):

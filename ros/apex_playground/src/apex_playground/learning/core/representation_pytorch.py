@@ -853,14 +853,14 @@ model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B1
 Poppimage20_B15_C30_D300 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
                                                         n_channels=3, height=64, width=64, batch_size=256)
 Poppimage20_B15_C30_D300.load_model(model_path)
-Poppimage10_B10_C25_D800.representation.sorted_latents = np.array([17, 5, 18, 11, 14, 0, 9, 13, 16, 10,
+Poppimage20_B15_C30_D300.representation.sorted_latents = np.array([17, 5, 18, 11, 14, 0, 9, 13, 16, 10,
                                                                    1, 3, 12, 6, 2, 7, 15, 19,  8,  4])
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B15_C50_D300'
 Poppimage20_B15_C50_D300 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
                                                         n_channels=3, height=64, width=64, batch_size=256)
 Poppimage20_B15_C50_D300.load_model(model_path)
-Poppimage10_B10_C25_D800.representation.sorted_latents = np.array([0, 15, 12, 7, 18, 8, 5, 19, 13, 14,
+Poppimage20_B15_C50_D300.representation.sorted_latents = np.array([0, 15, 12, 7, 18, 8, 5, 19, 13, 14,
                                                                    6, 9, 16, 10, 3, 4, 11, 17, 1, 2])
 
 
