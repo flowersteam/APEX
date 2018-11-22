@@ -229,7 +229,7 @@ class MUGLLearner(Learner):
         if self.debug:
             # We check the reconstruction by the reprensentation
             self.representation.act(X_pred=np.array(context))
-            reconstruction = self.representation.prediction[0]
+            reconstruction = self.representation.prediction[0].transpose(2, 0, 1)
             scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
             scipy.misc.imsave('/home/flowers/Documents/tests/reconstruction' + str(self.t) + '.jpeg', reconstruction)
 
