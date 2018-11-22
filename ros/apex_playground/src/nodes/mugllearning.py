@@ -91,8 +91,8 @@ class Learner(object):
 
 
 class MUGLLearner(Learner):
-    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_motor_babbling=0.1,
-                 explo_noise=0.05, choice_eps=0.1, debug=False):
+    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_latents,
+                 n_motor_babbling=0.1, explo_noise=0.05, choice_eps=0.1, debug=False):
         super(MUGLLearner, self).__init__()
         self.debug = debug
 
@@ -111,7 +111,7 @@ class MUGLLearner(Learner):
 
         # Define motor and sensory spaces:
         m_ndims = self.conf.m_ndims  # number of motor parameters
-        latents_ndims = 10  # Number of latent variables in representation
+        latents_ndims = n_latents  # Number of latent variables in representation
 
         self.m_space = list(range(m_ndims))
         self.c_dims = list(range(m_ndims, m_ndims + latents_ndims))
@@ -492,14 +492,14 @@ if __name__ == "__main__":
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
+                              n_latents=10, experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
     elif "VAE20" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 40,
                       s_maxs=[2.5] * 40)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
+                              n_latents=20, experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
     elif "FI" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
