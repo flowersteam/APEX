@@ -450,6 +450,7 @@ class FILearner(Learner):
 
 
 if __name__ == "__main__":
+    # Possible babbling modes: MGEVAE10, MGEVAE20, MGEBetaVAE10, MGEBetaVAE20C30, MGEBetaVAE20C50
     parser = argparse.ArgumentParser(description='Perform mugl learning.')
     parser.add_argument('--exp_name', type=str, help='Experiment name (part of path to save data)')
     parser.add_argument('--babbling', type=str, help='Babbling mode')
@@ -457,6 +458,7 @@ if __name__ == "__main__":
     parser.add_argument('--trial', type=int, help='Trial number')
     parser.add_argument('--n_iter', metavar='-n', type=int, help='Number of exploration iterations')
     parser.add_argument('--n_modules', type=int, default=5, help='Number of modules for MUGL learning')
+    parser.add_argument('--debug', type=int, default=0, help='Enable debug mode or not')
     args = parser.parse_args()
 
     folder_trial = os.path.join("/home/flowers/Documents/expe_poppimage",
@@ -467,7 +469,7 @@ if __name__ == "__main__":
     with open(os.path.join(folder_trial, 'config.json'), 'w') as f:
         json.dump(vars(args), f, separators=(',\n', ': '))
 
-    environment = ArenaEnvironment(args.apex, debug=False)
+    environment = ArenaEnvironment(args.apex, debug=args.debug)
 
     if args.babbling == "RandomMotor":
         config = dict(m_mins=[-1.] * environment.m_ndims,
@@ -475,21 +477,21 @@ if __name__ == "__main__":
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
+                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=args.debug)
     elif "VAE" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              experiment_name=args.exp_name, trial=args.trial, debug=False)
+                              experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
     elif "FI" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-1] * 7,
                       s_maxs=[1] * 7)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=False)
+                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=args.debug)
     else:
         raise NotImplementedError
 
