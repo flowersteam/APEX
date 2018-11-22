@@ -486,11 +486,18 @@ if __name__ == "__main__":
                       s_maxs=[2.5] * 20)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                             experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=args.debug)
-    elif "VAE" in args.babbling:
+    elif "VAE10" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
+        learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
+                              experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
+    elif "VAE20" in args.babbling:
+        config = dict(m_mins=[-1.] * environment.m_ndims,
+                      m_maxs=[1.] * environment.m_ndims,
+                      s_mins=[-2.5] * 40,
+                      s_maxs=[2.5] * 40)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                               experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
     elif "FI" in args.babbling:
