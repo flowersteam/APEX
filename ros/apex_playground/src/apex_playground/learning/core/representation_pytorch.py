@@ -831,6 +831,13 @@ PoppimageVAE10 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, be
 PoppimageVAE10.load_model(model_path)
 PoppimageVAE10.sorted_latents = np.array([1, 2, 8, 3, 6, 5, 4, 0, 7, 9])
 
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_ent20'
+PoppimageVAE20 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
+                                               n_channels=3, height=64, width=64, batch_size=256)
+PoppimageVAE20.load_model(model_path)
+PoppimageVAE20.sorted_latents = np.array([4, 19, 6, 2, 3, 5, 17, 13, 1, 14,
+                                          10, 12, 15, 8, 11, 9, 0, 16, 18, 7])
+
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B10_C25_D800'
 Poppimage10_B10_C25_D800 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
                                                         n_channels=3, height=64, width=64, batch_size=256)
@@ -883,7 +890,8 @@ if __name__ == '__main__':
     for i, img in enumerate(images):
         data[i] = scipy.misc.imresize(scipy.misc.imread("{}/{}".format(img_path, img)), (64, 64, 3))
     data = data / data.max()
-    representations = [PoppimageVAE10, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300]
+    representations = [PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800,
+                       Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300]
     for rep in representations:
         rep.estimate_kld(data, data)
         print(rep.sorted_latents)

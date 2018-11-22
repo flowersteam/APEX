@@ -12,7 +12,7 @@ from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
 
 from apex_playground.learning.core.learning_module import LearningModule
-from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300
+from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300
 
 from environments import ArenaEnvironment, DummyEnvironment
 
