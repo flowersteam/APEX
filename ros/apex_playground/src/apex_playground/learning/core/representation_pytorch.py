@@ -841,27 +841,27 @@ model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_en
 PoppimageVAE10 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
                                                n_channels=3, height=64, width=64, batch_size=256)
 PoppimageVAE10.load_model(model_path)
-PoppimageVAE10.representation.sorted_latents = np.array([1, 2, 8, 3, 6, 5, 4, 0, 7, 9])
+PoppimageVAE10.sorted_latents = np.array([1, 2, 8, 3, 6, 5, 4, 0, 7, 9])
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B10_C25_D800'
 Poppimage10_B10_C25_D800 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
                                                         n_channels=3, height=64, width=64, batch_size=256)
 Poppimage10_B10_C25_D800.load_model(model_path)
-Poppimage10_B10_C25_D800.representation.sorted_latents = np.array([7, 6, 5, 1, 9, 3, 8, 4, 2, 0])
+Poppimage10_B10_C25_D800.sorted_latents = np.array([7, 6, 5, 1, 9, 3, 8, 4, 2, 0])
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B15_C30_D300'
 Poppimage20_B15_C30_D300 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
                                                         n_channels=3, height=64, width=64, batch_size=256)
 Poppimage20_B15_C30_D300.load_model(model_path)
-Poppimage20_B15_C30_D300.representation.sorted_latents = np.array([17, 5, 18, 11, 14, 0, 9, 13, 16, 10,
-                                                                   1, 3, 12, 6, 2, 7, 15, 19,  8,  4])
+Poppimage20_B15_C30_D300.sorted_latents = np.array([17, 5, 18, 11, 14, 0, 9, 13, 16, 10,
+                                                    1, 3, 12, 6, 2, 7, 15, 19,  8,  4])
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_B15_C50_D300'
 Poppimage20_B15_C50_D300 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',
                                                         n_channels=3, height=64, width=64, batch_size=256)
 Poppimage20_B15_C50_D300.load_model(model_path)
-Poppimage20_B15_C50_D300.representation.sorted_latents = np.array([0, 15, 12, 7, 18, 8, 5, 19, 13, 14,
-                                                                   6, 9, 16, 10, 3, 4, 11, 17, 1, 2])
+Poppimage20_B15_C50_D300.sorted_latents = np.array([0, 15, 12, 7, 18, 8, 5, 19, 13, 14,
+                                                    6, 9, 16, 10, 3, 4, 11, 17, 1, 2])
 
 
 if __name__ == '__main__':
