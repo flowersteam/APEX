@@ -121,8 +121,8 @@ if __name__ == "__main__":
             scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
             if args.save_pos:
                 data = {"m": np.array(traj, dtype=np.float16),
-                         "ball": np.array(ball_center, dtype=np.float16),
-                         "ergo": np.array(ergo_position)}
+                        "ball": np.array(ball_center, dtype=np.float16),
+                        "ergo": np.array(ergo_position)}
                 with open(os.path.join(args.path, filename + '.pickle'), 'wb') as f:
                     pickle.dump(data, f)
 
