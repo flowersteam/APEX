@@ -34,8 +34,8 @@ class MiscRandomInterest(RandomInterest):
         self.progress_mode = progress_mode
         self.data_xc = Dataset(len(expl_dims), 1)
         self.data_sr = Dataset(len(expl_dims), 0)
-        self.current_progress = 1e-5
-        self.current_interest = 1e-5
+        self.current_progress = 0
+        self.current_interest = 0
 
     def add_xc(self, x, c):
         self.data_xc.add_xy(x, [c])
@@ -164,8 +164,8 @@ class MiscGaussianInterest(InterestModel):
         self.progress_mode = progress_mode
         self.data_xc = Dataset(len(expl_dims), 1)
         self.data_sr = Dataset(len(expl_dims), 0)
-        self.current_progress = 1e-5
-        self.current_interest = 1e-5
+        self.current_progress = 0
+        self.current_interest = 0
 
     def sample(self):
         return np.clip(np.random.randn(self.ndims), a_min=self.bounds[0], a_max=self.bounds[1])

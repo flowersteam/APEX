@@ -12,7 +12,7 @@ from apex_playground.learning.core.interest_model import MiscRandomInterest, Mis
 
 
 class LearningModule(Agent):
-    def __init__(self, mid, m_space, s_space, env_conf, explo_noise, win_size=500, interest_model='uniform', context_mode=None):
+    def __init__(self, mid, m_space, s_space, env_conf, explo_noise, win_size=100, interest_model='uniform', context_mode=None):
 
         self.conf = make_configuration(env_conf.m_mins[m_space],
                                        env_conf.m_maxs[m_space],
