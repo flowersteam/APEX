@@ -10,26 +10,20 @@ bmap = brewer2mpl.get_map('Dark2', 'qualitative', 8)
 colors = bmap.mpl_colors
 
 
-
-simu = False
-
-if simu:
-    
-    # From SIMU
-    path = "/home/sforesti/catkin_ws/src/nips2017/logs/"
-    experiment_name = "experiment"
-    configs = dict(AMB=9)#, RMB=3, RmB=3, FC=1, OS=3)
-    n = 10000
-    j_error = 0.1
+if len(sys.argv) > 2 and sys.argv[2] in ["compute", "show"]:
+    action = sys.argv[2]
 else:
-    
-    # PARAMS
-    experiment_name = "holidays"
-    path = "/data/APEX/" + "result_august" + "/"
-    configs = dict(AMB=5, RMB=4, FC=6, OS=5)
-    #configs = dict(FC=2)
-    n =20000
-    j_error = 0.2
+    raise NotImplementedError
+
+# PARAMS
+experiment_name = sys.argv[1]
+path = "/data/APEX/"
+
+print "Experiment files:", path + experiment_name
+
+configs = dict(RMB=range(4))
+n = 6000
+j_error = 0.2
 
 
 
@@ -70,7 +64,7 @@ def compute_explo(data, min_, max_, checkpoints=None):
     return np.array(res) / gs ** nd
     
 
-if False:
+if action == "compute":
 
     
     explo = {}
@@ -93,12 +87,12 @@ if False:
         explo['Light'][config] = {}
         explo['Sound'][config] = {}
     
-        for trial in range(configs[config]):
+        for trial in configs[config]:
             
-            print "\nLoading", config, trial
+            filename = path + experiment_name + '/' + experiment_name + "_" + config + "_" + str(trial) + ".pickle"
+            print "\nLoading", config, trial, filename
             
             try:
-                filename = path + experiment_name + "_" + config + "_" + str(trial) + ".pickle"
                 with open(filename, 'r') as f:
                     log = cPickle.load(f)
                 f.close()
