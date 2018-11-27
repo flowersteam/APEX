@@ -200,12 +200,12 @@ class Supervisor(object):
             n_rgb = 200
             interest_threshold = 0.0
             temperature = 0.5
-            
+            mids = ["mod1", "mod3", "mod2", "mod4", "mod5", "mod6", "mod7"]
             if self.t < n_rgb or np.random.random() < eps_rgb or sum(interests.values()) == 0.:
-                mid = np.random.choice(interests.keys())
+                mid = np.random.choice(mids)
             else:
-                total_interest = sum([interests[key] for key in interests.keys()])
-                non_zero_interests = {key:interests[key] for key in interests.keys() if interests[key] > total_interest * interest_threshold}
+                total_interest = sum([interests[key] for key in mids])
+                non_zero_interests = {key:interests[key] for key in mids if interests[key] > total_interest * interest_threshold}
                 w = np.array(non_zero_interests.values())   
                 w = w / np.sum(w)
                 probas = np.exp(w / temperature)
