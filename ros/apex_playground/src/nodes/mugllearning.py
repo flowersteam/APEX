@@ -92,7 +92,7 @@ class Learner(object):
 
 class MUGLLearner(Learner):
     def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_latents,
-                 n_motor_babbling=0.1, explo_noise=0.05, choice_eps=0.1, debug=False):
+                 eps_motor_babbling, n_motor_babbling, explo_noise, choice_eps, debug):
         super(MUGLLearner, self).__init__()
         self.debug = debug
 
@@ -102,6 +102,7 @@ class MUGLLearner(Learner):
         self.environment = environment
         self.babbling_mode = babbling_mode
         self.n_motor_babbling = n_motor_babbling
+        self.eps_motor_babbling = eps_motor_babbling
         self.explo_noise = explo_noise
         self.choice_eps = choice_eps
 
@@ -220,7 +221,7 @@ class MUGLLearner(Learner):
             self.progresses_evolution[mid] = []
             self.interests_evolution[mid] = []
 
-    def produce(self, context):
+    def produce(self, context, motor_babbling):
         # Normalize data
         context = np.array(context) / 249.0
 
@@ -231,7 +232,7 @@ class MUGLLearner(Learner):
             scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
             scipy.misc.imsave('/home/flowers/Documents/tests/reconstruction' + str(self.t) + '.jpeg', reconstruction)
 
-        if np.random.random() < self.n_motor_babbling:
+        if np.random.random() < self.eps_motor_babbling or motor_babbling:
             self.mid_control = None
             self.chosen_modules.append("motor_babbling")
             return self.motor_babbling()
@@ -266,7 +267,7 @@ class MUGLLearner(Learner):
     def perceive(self, context, outcome):
         # Normalize data
         context = np.array(context) / 249.0
-        outcome = np.array(context) / 249.0
+        outcome = np.array(outcome) / 249.0
         context_sensori = np.stack([context, outcome])
 
         if self.debug:
@@ -301,9 +302,13 @@ class MUGLLearner(Learner):
         for _ in tqdm(range(n_iter)):
             self.environment.reset()
             c_img, c_ball_center, c_arena_center, c_ergo_pos, _, c_extracted = self.environment.get_current_context()
-
             c_img = self.preprocess_image(c_img)
-            m = self.produce(c_img)
+
+            if self.n_motor_babbling > 0:
+                motor_babbling = True
+            else:
+                motor_babbling = False
+            m = self.produce(c_img, motor_babbling)
 
             o_img, o_ball_center, o_arena_center, o_ergo_pos, _, o_extracted = self.environment.update(m)
             o_img = self.preprocess_image(o_img)
@@ -325,8 +330,8 @@ class MUGLLearner(Learner):
 
 
 class FILearner(Learner):
-    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_motor_babbling=0.1,
-                 explo_noise=0.05, choice_eps=0.1, debug=False):
+    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, eps_motor_babbling,
+                 n_motor_babbling, explo_noise, choice_eps, debug):
         super(FILearner, self).__init__()
         self.debug = debug
 
@@ -335,6 +340,7 @@ class FILearner(Learner):
 
         self.environment = environment
         self.babbling_mode = babbling_mode
+        self.eps_motor_babbling = eps_motor_babbling
         self.n_motor_babbling = n_motor_babbling
         self.explo_noise = explo_noise
         self.choice_eps = choice_eps
@@ -380,8 +386,8 @@ class FILearner(Learner):
             self.progresses_evolution[mid] = []
             self.interests_evolution[mid] = []
 
-    def produce(self, context):
-        if np.random.random() < self.n_motor_babbling:
+    def produce(self, context, motor_babbling):
+        if np.random.random() < self.eps_motor_babbling or motor_babbling:
             self.mid_control = None
             self.chosen_modules.append("motor_babbling")
             return self.motor_babbling()
@@ -441,7 +447,11 @@ class FILearner(Learner):
             self.environment.reset()
             _, c_ball_center, c_arena_center, c_ergo_pos, c_ball_state, c_extracted = self.environment.get_current_context()
 
-            m = self.produce(c_ball_state)
+            if self.n_motor_babbling > 0:
+                motor_babbling = True
+            else:
+                motor_babbling = False
+            m = self.produce(c_ball_state, motor_babbling)
 
             _, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.update(m)
 
@@ -461,6 +471,9 @@ if __name__ == "__main__":
     parser.add_argument('--trial', type=int, help='Trial number')
     parser.add_argument('--n_iter', metavar='-n', type=int, help='Number of exploration iterations')
     parser.add_argument('--n_modules', type=int, default=5, help='Number of modules for MUGL learning')
+    parser.add_argument('--explo_noise', type=float, default=0.1, help='Exploration noise')
+    parser.add_argument('--n_motor_babbling', type=int, default=100, help='Number of random motor babbling iterations')
+    parser.add_argument('--eps', type=float, default=0.1, help='Proportion of random modules chosen')
     parser.add_argument('--debug', type=int, default=0, help='Enable debug mode or not')
     args = parser.parse_args()
 
@@ -480,28 +493,34 @@ if __name__ == "__main__":
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=args.debug)
+                            experiment_name=args.exp_name, trial=args.trial, eps_motor_babbling=1., n_motor_babbling=0,
+                            explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
     elif "VAE10" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              n_latents=10, experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
+                              n_latents=10, experiment_name=args.exp_name, trial=args.trial,
+                              n_motor_babbling=args.n_motor_babbling, explo_noise=args.explo_noise, choice_eps=args.eps,
+                              debug=args.debug)
     elif "VAE20" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 40,
                       s_maxs=[2.5] * 40)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              n_latents=20, experiment_name=args.exp_name, trial=args.trial, debug=args.debug)
+                              n_latents=20, experiment_name=args.exp_name, trial=args.trial,
+                              n_motor_babbling=args.n_motor_babbling, explo_noise=args.explo_noise, choice_eps=args.eps,
+                              debug=args.debug)
     elif "FI" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-1] * 7,
                       s_maxs=[1] * 7)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=1., debug=args.debug)
+                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=args.n_motor_babbling,
+                            explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
     else:
         raise NotImplementedError
 
