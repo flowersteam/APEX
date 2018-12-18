@@ -540,6 +540,7 @@ if __name__ == "__main__":
     parser.add_argument('--n_iter', metavar='-n', type=int, help='Number of exploration iterations')
     parser.add_argument('--n_modules', type=int, default=5, help='Number of modules for MUGL learning')
     parser.add_argument('--explo_noise', type=float, default=0.1, help='Exploration noise')
+    parser.add_argument('--eps_motor_babbling', type=float, default=0.1, help='Proportion of random motor command')
     parser.add_argument('--n_motor_babbling', type=int, default=100, help='Number of random motor babbling iterations')
     parser.add_argument('--eps', type=float, default=0.1, help='Proportion of random modules chosen')
     parser.add_argument('--debug', type=int, default=0, help='Enable debug mode or not')
@@ -570,7 +571,8 @@ if __name__ == "__main__":
                       s_maxs=[2.5] * 20)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                               n_latents=10, experiment_name=args.exp_name, trial=args.trial,
-                              n_motor_babbling=args.n_motor_babbling, explo_noise=args.explo_noise, choice_eps=args.eps,
+                              eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
+                              explo_noise=args.explo_noise, choice_eps=args.eps,
                               debug=args.debug)
     elif "VAE20" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
@@ -579,7 +581,8 @@ if __name__ == "__main__":
                       s_maxs=[2.5] * 40)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                               n_latents=20, experiment_name=args.exp_name, trial=args.trial,
-                              n_motor_babbling=args.n_motor_babbling, explo_noise=args.explo_noise, choice_eps=args.eps,
+                              eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
+                              explo_noise=args.explo_noise, choice_eps=args.eps,
                               debug=args.debug)
     elif "FI" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
@@ -587,7 +590,8 @@ if __name__ == "__main__":
                       s_mins=[-1] * 7,
                       s_maxs=[1] * 7)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                            experiment_name=args.exp_name, trial=args.trial, n_motor_babbling=args.n_motor_babbling,
+                            experiment_name=args.exp_name, trial=args.trial,
+                            eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
                             explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
     else:
         raise NotImplementedError
