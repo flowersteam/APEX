@@ -440,8 +440,6 @@ class PytorchBetaVAERepresentation(object):
                 self.model.plot_reconstruction_vs_latent(data_loader, self.sorted_latents, self._typical_img)
                 self.model.plot_latent_space(data_loader, self.sorted_latents)
             self.net_epochs += 1
-            if periodic_save and self.net_epochs == self.initial_epochs // 10:
-                torch.save(self.model.state_dict(), 'weights/' + self._visdom_env + f'iter_{self.net_epochs}')
 
         self._update_prediction(data_loader)
         self._update_representation(data_loader)
