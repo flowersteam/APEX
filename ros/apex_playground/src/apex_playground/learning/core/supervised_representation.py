@@ -510,7 +510,7 @@ class PytorchBetaVAERepresentation(object):
 
         self.model.eval()
 
-    def act(self, *args, X_pred=None, X_train=None, y_train=None, X_test=None, y_test=None):
+    def act(self, X_pred=None, X_train=None, y_train=None, X_test=None, y_test=None):
 
         if X_train is not None and X_pred is not None and X_test is not None:
             raise Exception("Calling multiple modes at once is not possible.")
