@@ -7,8 +7,6 @@ from torch.nn import functional as F
 
 import visdom
 
-from latentgoalexplo.actors.meta_actors import *
-
 
 CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if CUDA else "cpu")
