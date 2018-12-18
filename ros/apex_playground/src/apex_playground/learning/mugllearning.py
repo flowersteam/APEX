@@ -72,7 +72,7 @@ class Learning(object):
                                       n_motor_babbling=self.n_motor_babbling,
                                       explo_noise=self.explo_noise,
                                       choice_eps=self.choice_eps)
-        if self.condition in ["MGEVAE", "RGEVAE", "MGEBVAE", "RGEBVAE"]:
+        elif self.condition in ["MGEVAE", "RGEVAE", "MGEBVAE", "RGEBVAE"]:
             self.agent = SupervisorRep(self.config,
                                        babbling_mode=self.condition,
                                        n_motor_babbling=self.n_motor_babbling,
@@ -94,9 +94,9 @@ class Learning(object):
 
     def plot(self):
         fig, ax = plt.subplots()
-        ax.plot(self.get_unnormalized_interests_evolution(), lw=2)
+        ax.plot(self.get_normalized_interests_evolution(), lw=2)
         if self.condition in ["MGEFI", "RGEFI"]:
-            ax.legend(["Arm", "Ball"], ncol=3)
+            ax.legend(["Arm", "Distractor", "Ball"], ncol=3)
         if self.condition in ["MGEVAE", "MGEBVAE"]:
             ax.legend(["mod0", "mod1", "mod2", "mod3", "mod4"], ncol=3)
         ax.set_xlabel('Time steps', fontsize=20)

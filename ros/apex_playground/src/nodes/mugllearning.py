@@ -13,6 +13,7 @@ from explauto.utils.config import make_configuration
 
 from apex_playground.learning.core.learning_module import LearningModule
 from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300
+from apex_playground.learning.core.supervised_representation import SupPoppimage10_B20_C20_D600
 
 from environments import ArenaEnvironment, DummyEnvironment
 
@@ -115,13 +116,12 @@ class MUGLLearner(Learner):
         latents_ndims = n_latents  # Number of latent variables in representation
 
         self.m_space = list(range(m_ndims))
-        self.c_dims = list(range(m_ndims, m_ndims + latents_ndims))
         self.s_latents = list(range(m_ndims + latents_ndims, m_ndims + 2 * latents_ndims))
 
         # Create the learning modules:
         if self.babbling_mode == "MGEVAE10":
             self.representation = PoppimageVAE10
-            # Create one module per two latents
+            # Create one module per n_latents // n_modules
             for i in range(n_modules):
                 module_id = "mod" + str(i)
                 c_mod = self.representation.sorted_latents[
@@ -140,7 +140,7 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEVAE20":
             self.representation = PoppimageVAE20
-            # Create one module per two latents
+            # Create one module per n_latents // n_modules
             for i in range(n_modules):
                 module_id = "mod" + str(i)
                 c_mod = self.representation.sorted_latents[
@@ -159,7 +159,7 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE10":
             self.representation = Poppimage10_B10_C25_D800
-            # Create one module per two latents
+            # Create one module per n_latents // n_modules
             for i in range(n_modules):
                 module_id = "mod" + str(i)
                 c_mod = self.representation.sorted_latents[
@@ -178,7 +178,7 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE20C30":
             self.representation = Poppimage20_B15_C30_D300
-            # Create one module per two latents
+            # Create one module per n_latents // n_modules
             for i in range(n_modules):
                 module_id = "mod" + str(i)
                 c_mod = self.representation.sorted_latents[
@@ -197,7 +197,7 @@ class MUGLLearner(Learner):
                 self.modules[module_id] = module
         elif self.babbling_mode == "MGEBetaVAE20C50":
             self.representation = Poppimage20_B15_C50_D300
-            # Create one module per two latents
+            # Create one module per n_latents // n_modules
             for i in range(n_modules):
                 module_id = "mod" + str(i)
                 c_mod = self.representation.sorted_latents[
@@ -214,6 +214,72 @@ class MUGLLearner(Learner):
                                                               [2.5] * (self.representation.n_latents // n_modules)]),
                                         explo_noise=self.explo_noise)
                 self.modules[module_id] = module
+        elif self.babbling_mode == "SemisupVAE10":
+            self.representation = SupPoppimage10_B20_C20_D600
+            # Create one module per n_latents // n_modules
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
+        elif self.babbling_mode == "SupVAE10":
+            self.representation = SupPoppimage10_B20_C20_D600
+            c_ball = np.array([3])
+            # Setup
+            module_id = "mod0"
+            s_mod = np.array([0, 1, 2]) + m_ndims + self.representation.n_latents
+            module = LearningModule(module_id, self.m_space, list(c_ball + m_ndims) + list(s_mod), self.conf,
+                                    interest_model='normal',
+                                    context_mode=dict(mode='mcs',
+                                                      context_n_dims=1,
+                                                      context_dims=list(c_ball),
+                                                      context_sensory_bounds=[[-2.5], [2.5]]),
+                                    explo_noise=self.explo_noise)
+            self.modules[module_id] = module
+            # Ball
+            module_id = "mod1"
+            s_mod = np.array([3]) + m_ndims + self.representation.n_latents
+            module = LearningModule(module_id, self.m_space, list(c_ball + m_ndims) + list(s_mod), self.conf,
+                                    interest_model='normal',
+                                    context_mode=dict(mode='mcs',
+                                                      context_n_dims=1,
+                                                      context_dims=list(c_ball),
+                                                      context_sensory_bounds=[[-2.5], [2.5]]),
+                                    explo_noise=self.explo_noise)
+            self.modules[module_id] = module
+            # Ergo
+            module_id = "mod2"
+            s_mod = np.array([4, 5]) + m_ndims + self.representation.n_latents
+            module = LearningModule(module_id, self.m_space, list(c_ball + m_ndims) + list(s_mod), self.conf,
+                                    interest_model='normal',
+                                    context_mode=dict(mode='mcs',
+                                                      context_n_dims=1,
+                                                      context_dims=list(c_ball),
+                                                      context_sensory_bounds=[[-2.5], [2.5]]),
+                                    explo_noise=self.explo_noise)
+            self.modules[module_id] = module
+            # Rest
+            module_id = "mod3"
+            s_mod = np.array([6, 7, 8, 9]) + m_ndims + self.representation.n_latents
+            module = LearningModule(module_id, self.m_space, list(c_ball + m_ndims) + list(s_mod), self.conf,
+                                    interest_model='normal',
+                                    context_mode=dict(mode='mcs',
+                                                      context_n_dims=1,
+                                                      context_dims=list(c_ball),
+                                                      context_sensory_bounds=[[-2.5], [2.5]]),
+                                    explo_noise=self.explo_noise)
+            self.modules[module_id] = module
         else:
             raise NotImplementedError
 
@@ -330,6 +396,7 @@ class MUGLLearner(Learner):
 
 
 class FILearner(Learner):
+    # TODO : test this one
     def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, eps_motor_babbling,
                  n_motor_babbling, explo_noise, choice_eps, debug):
         super(FILearner, self).__init__()
@@ -359,7 +426,7 @@ class FILearner(Learner):
 
         # Create the learning modules:
         if self.babbling_mode == "FlatFI" or self.babbling_mode == "RandomMotor":
-            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo + self.s_ball,
+            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball,
                                                   self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
@@ -367,13 +434,13 @@ class FILearner(Learner):
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
         elif self.babbling_mode == "ModularFI":
-            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo, self.conf,
+            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
-            self.modules["mod2"] = LearningModule("mod2", self.m_space, self.c_dims + self.ball, self.conf,
+            self.modules["mod2"] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ball, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
@@ -463,7 +530,8 @@ class FILearner(Learner):
 
 
 if __name__ == "__main__":
-    # Possible babbling modes: MGEVAE10, MGEVAE20, MGEBetaVAE10, MGEBetaVAE20C30, MGEBetaVAE20C50
+    # Possible babbling modes: MGEVAE10, MGEVAE20, MGEBetaVAE10, MGEBetaVAE20C30, MGEBetaVAE20C50,
+    # Semisup, Sup
     parser = argparse.ArgumentParser(description='Perform mugl learning.')
     parser.add_argument('--exp_name', type=str, help='Experiment name (part of path to save data)')
     parser.add_argument('--babbling', type=str, help='Babbling mode')

@@ -12,7 +12,7 @@ from apex_playground.learning.core.interest_model import MiscRandomInterest, Mis
 
 
 class LearningModule(Agent):
-    def __init__(self, mid, m_space, s_space, env_conf, explo_noise, win_size=100, interest_model='uniform', context_mode=None):
+    def __init__(self, mid, m_space, s_space, env_conf, explo_noise, win_size=200, interest_model='uniform', context_mode=None):
 
         self.conf = make_configuration(env_conf.m_mins[m_space],
                                        env_conf.m_maxs[m_space],
@@ -33,7 +33,7 @@ class LearningModule(Agent):
         if context_mode is not None:
             if interest_model == 'uniform':
                 im_cls, kwargs = (ContextRandomInterest, {
-                    'win_size': 50,
+                    'win_size': win_size,
                     'competence_mode': 'knn',
                     'k': 20,
                     'progress_mode': 'local',

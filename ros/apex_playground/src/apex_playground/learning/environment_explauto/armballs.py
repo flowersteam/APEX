@@ -364,7 +364,7 @@ class MyArmBalls(object):
 
         self._dynamic_environment = FixedEpisodeDynamizer(static_env=ArmBalls, n_iter=n_timesteps,
                                                           arm_lengths=arm_lengths, object_size=object_size,
-                                                          distract_size=distract_size, distract_noise=distract_noise)
+                                                          distract_size=distract_size, distract_noise=distract_noise, **kwargs)
         self._controller = RbfController(n_action_dims=len(arm_lengths), n_rbf=n_rbf,
                                          n_timesteps=n_timesteps, sdev=sdev)
         self.render_interval = render_interval
@@ -479,39 +479,44 @@ class TestNCArmBallsEnv(Environment):
 
         Environment.__init__(self, m_mins, m_maxs, s_mins, s_maxs)
 
-        # SPACES
-        # self.hand = 30 * [0.]
-
         # Env
-        self.env = MyArmBalls(arm_lengths=np.array([0.5, 0.3, 0.2]), object_size=0.1, n_rbf=5)
+        self.env = MyArmBalls(arm_lengths=np.array([0.5, 0.3, 0.2]), object_size=0.1, n_rbf=5, stochastic=True)
         self.env.reset()
 
         # COMPUTE PERCEPTION
-        self.arm = list(self.env.observation[:3])
+        self.arm = list(self.env.observation[-6:-4])
         self.distractor = list(self.env.observation[-4:-2])
         self.ball = list(self.env.observation[-2:])
 
         # CONTEXT
-        self.current_context = list(self.arm + self.distractor + self.ball)
+        self.current_context = self.ball
 
     def compute_motor_command(self, m):
         return bounds_min_max(m, self.conf.m_mins, self.conf.m_maxs)
 
+    def reset(self):
+        self.env.reset()
+
+        # COMPUTE PERCEPTION
+        self.ball = list(self.env.observation[-2:])
+
+        # CONTEXT
+        self.current_context = self.ball
+
     def compute_sensori_effect(self, m):
 
         # SAMPLE DMP
-        self.env.reset()
         self.env.act(m, render=False)
 
         # COMPUTE PERCEPTION
-        self.arm = list(self.env.observation[:3])
+        self.arm = list(self.env.observation[-6:-4])
         self.distractor = list(self.env.observation[-4:-2])
         self.ball = list(self.env.observation[-2:])
 
         # CONTEXT
-        self.current_context = list(self.arm + self.distractor + self.ball)
+        self.current_context = self.ball
 
-        return self.current_context
+        return self.arm + self.distractor + self.ball
 
 
 class TestArmBallsEnv(ContextEnvironment):
@@ -519,12 +524,12 @@ class TestArmBallsEnv(ContextEnvironment):
         env_cls = TestNCArmBallsEnv
         env_conf = dict(m_mins=[-1.] * 3 * 5,
                         m_maxs=[1.] * 3 * 5,
-                        s_mins=[-1.] * 5,
-                        s_maxs=[1.] * 5)
+                        s_mins=[-1.] * 6,
+                        s_maxs=[1.] * 6)
 
         context_mode = dict(mode='mcs',
-                            context_n_dims=7,
-                            context_sensory_bounds=[[-1.] * 7, [1.] * 7])
+                            context_n_dims=2,
+                            context_sensory_bounds=[[-1.] * 2, [1.] * 2])
 
         ContextEnvironment.__init__(self, env_cls, env_conf, context_mode)
 
@@ -534,17 +539,11 @@ class TestNCArmBallsObsEnv(Environment):
 
         Environment.__init__(self, m_mins, m_maxs, s_mins, s_maxs)
 
-        # SPACES
-        # self.hand = 30 * [0.]
-
         # Env
         self.render = render
         self.env = MyArmBallsObserved(arm_lengths=np.array([0.5, 0.3, 0.2]), object_size=0.1, n_rbf=5, render_arm=False,
                                       width=64, height=64, stochastic=True, render=render, render_interval=render_interval)
         self.env.reset()
-
-        # COMPUTE PERCEPTION
-        self.image = self.env.observation
 
         # CONTEXT
         self.current_context = self.env.observation
@@ -555,18 +554,12 @@ class TestNCArmBallsObsEnv(Environment):
     def reset(self):
         self.env.reset()
 
-        # COMPUTE PERCEPTION
-        self.image = self.env.observation
-
         # CONTEXT
         self.current_context = self.env.observation
 
     def compute_sensori_effect(self, m):
         # SAMPLE DMP
         self.env.act(m, render=self.render)
-
-        # COMPUTE PERCEPTION
-        self.image = self.env.observation
 
         # CONTEXT
         self.current_context = self.env.observation

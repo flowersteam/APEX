@@ -1,7 +1,6 @@
 import numpy as np
 from tqdm import tqdm
 
-from environment_explauto.armball import TestArmBallEnv, TestArmBallObsEnv
 from environment_explauto.armballs import TestArmBallsEnv, TestArmBallsObsEnv
 from mugllearning import Learning
 
@@ -11,15 +10,15 @@ if __name__ == "__main__":
 
     render = False
     print("Create environment")
-    environment = TestArmBallEnv()
-    environment = TestArmBallsObsEnv(render=render)
+    environment = TestArmBallsEnv()
+    # environment = TestArmBallsObsEnv(render=render)
     
     print("Create agent")
     learning = Learning(dict(m_mins=environment.conf.m_mins,
                              m_maxs=environment.conf.m_maxs,
                              s_mins=environment.conf.s_mins,
                              s_maxs=environment.conf.s_maxs),
-                        condition="MGEBVAE", explo_noise=0.01, choice_eps=0.1)
+                        condition="MGEFI", explo_noise=0.05, choice_eps=0.2)
     learning.start()
 
     print()
@@ -68,7 +67,7 @@ if __name__ == "__main__":
     print(learning.agent.modules["mod1"].interest_model.current_interest)
     
     print()
-    print("Do 1000 autonomous steps:")
+    print("Do 10000 autonomous steps:")
     for i in tqdm(range(10000)):
         environment.reset()
         context = environment.get_current_context()

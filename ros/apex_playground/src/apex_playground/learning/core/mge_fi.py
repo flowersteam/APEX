@@ -1,11 +1,4 @@
-import argparse
-import os
-import datetime
-import json
-import pickle
 import numpy as np
-
-from baselines import logger
 
 from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
@@ -34,11 +27,13 @@ class SupervisorFI(object):
         m_ndims = self.conf.m_ndims  # number of motor parameters
 
         self.m_space = list(range(m_ndims))
-        self.c_dims = list(range(m_ndims, m_ndims + 5))
-        self.s_ergo = list(range(m_ndims + 5, m_ndims + 8))
-        self.s_ball = list(range(m_ndims + 8, m_ndims + 10))
+        self.c_dims = list(range(m_ndims, m_ndims + 2))
+        self.s_ergo = list(range(m_ndims + 2, m_ndims + 4))
+        self.s_distractor = list(range(m_ndims + 4, m_ndims + 6))
+        self.s_ball = list(range(m_ndims + 6, m_ndims + 8))
 
         self.s_spaces = dict(s_ergo=self.s_ergo,
+                             s_distractor=self.s_distractor,
                              s_ball=self.s_ball)
 
         self.ms = None
@@ -57,28 +52,33 @@ class SupervisorFI(object):
             # Create one module per object
             # Ergo
             self.modules['mod1'] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo, self.conf,
-                                                  context_mode=dict(mode='mcs', context_n_dims=5,
-                                                                    context_sensory_bounds=[[-1.] * 5, [1.] * 5]),
+                                                  context_mode=dict(mode='mcs', context_n_dims=2,
+                                                                    context_sensory_bounds=[[-1.] * 2, [1.] * 2]),
+                                                  explo_noise=self.explo_noise)
+            # Distractor
+            self.modules['mod2'] = LearningModule("mod2", self.m_space, self.c_dims + self.s_distractor, self.conf,
+                                                  context_mode=dict(mode='mcs', context_n_dims=2,
+                                                                    context_sensory_bounds=[[-1.] * 2, [1.] * 2]),
                                                   explo_noise=self.explo_noise)
             # Ball
-            self.modules['mod2'] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ball, self.conf,
-                                                  context_mode=dict(mode='mcs', context_n_dims=5,
-                                                                    context_sensory_bounds=[[-1.] * 5, [1.] * 5]),
+            self.modules['mod3'] = LearningModule("mod3", self.m_space, self.c_dims + self.s_ball, self.conf,
+                                                  context_mode=dict(mode='mcs', context_n_dims=2,
+                                                                    context_sensory_bounds=[[-1.] * 2, [1.] * 2]),
                                                   explo_noise=self.explo_noise)
             self.space2mid = dict(s_ergo="mod1",
-                                  s_ball="mod2")
-
+                                  s_distractor="mod2",
+                                  s_ball="mod3")
             self.mid2space = dict(mod1="s_ergo",
-                                  mod2="s_ball")
+                                  mod2="s_distractor",
+                                  mod3="s_ball")
 
         elif self.babbling_mode == "RGEFI":
             # Create only one module for all objects
-            self.modules['mod1'] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo + self.s_ball, self.conf,
+            self.modules['mod1'] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ergo + self.s_distractor + self.s_ball, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.], [1., 1.]]),
                                                   explo_noise=self.explo_noise)
             self.space2mid = dict(s_ergoball="mod1")
-
             self.mid2space = dict(mod1="s_ergoball")
 
         for mid in self.modules.keys():
@@ -128,8 +128,6 @@ class SupervisorFI(object):
                 self.chosen_modules.append("forced_" + mid)
                 self.increase_interest(mid)
             self.mid_control = mid
-            # TODO: install rospy
-            # rospy.loginfo("Chosen module: {}".format(mid))
 
             explore = True
             self.measure_interest = False
@@ -245,12 +243,19 @@ class SupervisorFI(object):
 
     def get_normalized_interests_evolution(self):
         if self.babbling_mode == "MGEFI":
-            data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod1", "mod2"]]))
+            data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod1", "mod2", "mod3"]]))
         elif self.babbling_mode == "RGEFI":
             data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod1"]]))
         data_sum = data.sum(axis=1)
         data_sum[data_sum == 0.] = 1.
         return data / data_sum.reshape(data.shape[0], 1)
+
+    def get_unnormalized_interests_evolution(self):
+        if self.babbling_mode == "MGEFI":
+            data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod1", "mod2", "mod3"]]))
+        elif self.babbling_mode == "RGEFI":
+            data = np.transpose(np.array([self.interests_evolution[mid] for mid in ["mod1"]]))
+        return data
 
     def get_normalized_interests(self):
         interests = {}
