@@ -40,7 +40,7 @@ class Learner(object):
 
     def motor_babbling(self):
         # TODO: check this
-        self.m = self.modules["mod1"].motor_babbling()
+        self.m = self.modules["mod0"].motor_babbling()
         return self.m
 
     def choose_babbling_module(self):
