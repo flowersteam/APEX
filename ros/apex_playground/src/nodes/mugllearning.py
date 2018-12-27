@@ -340,7 +340,7 @@ class MUGLLearner(Learner):
             # We check the reconstruction by the representation
             self.representation.act(X_pred=context_sensori)
             reconstruction = self.representation.prediction[0].transpose(1, 2, 0)
-            scipy.misc.imsave('/home/flowers/Documents/tests/context_sensori' + str(self.t) + '.jpeg', reconstruction)
+            scipy.misc.imsave('/home/flowers/Documents/tests/sensori' + str(self.t) + '.jpeg', reconstruction)
 
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
@@ -372,6 +372,7 @@ class MUGLLearner(Learner):
 
             if self.n_motor_babbling > 0:
                 motor_babbling = True
+                self.n_motor_babbling -= 1
             else:
                 motor_babbling = False
             m = self.produce(c_img, motor_babbling)
@@ -516,6 +517,7 @@ class FILearner(Learner):
 
             if self.n_motor_babbling > 0:
                 motor_babbling = True
+                self.n_motor_babbling -= 1
             else:
                 motor_babbling = False
             m = self.produce(c_ball_state, motor_babbling)
@@ -531,7 +533,7 @@ class FILearner(Learner):
 
 if __name__ == "__main__":
     # Possible babbling modes: MGEVAE10, MGEVAE20, MGEBetaVAE10, MGEBetaVAE20C30, MGEBetaVAE20C50,
-    # Semisup, Sup
+    # SemisupVAE10, SupVAE10
     parser = argparse.ArgumentParser(description='Perform mugl learning.')
     parser.add_argument('--exp_name', type=str, help='Experiment name (part of path to save data)')
     parser.add_argument('--babbling', type=str, help='Babbling mode')
