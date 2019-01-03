@@ -35,7 +35,7 @@ class ErgoDMP(object):
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(duration))
         self._reach_service_prox(reach_request)
-        rospy.sleep(duration-0.05)
+        rospy.sleep(duration - 0.05)
 
 
 class PosExtractor(object):
@@ -101,8 +101,13 @@ if __name__ == "__main__":
     n_bfs = 7
     timesteps = 40
     max_params = np.array([200.] * n_bfs * n_dmps + [1.] * n_dmps)
+    # Parameters to move ball
+    # bounds_motors_max = np.array([180, 0, 30, 70, 20, 70])
+    # bounds_motors_min = np.array([-180, 0, -20, -70, 0, 0])
+    # Parameters used in experiment
     bounds_motors_max = np.array([180, 0, 30, 70, 20, 70])
-    bounds_motors_min = np.array([-180, 0, -20, -70, 0, 0])
+    bounds_motors_min = np.array([-180, -40, -50, -70, -50, -50])
+
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
 
     for i in range(args.n_iter):
