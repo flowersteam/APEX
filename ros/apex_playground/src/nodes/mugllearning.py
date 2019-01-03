@@ -372,6 +372,7 @@ class MUGLLearner(Learner):
 
             if self.n_motor_babbling > 0:
                 motor_babbling = True
+                self.n_motor_babbling -= 1
             else:
                 motor_babbling = False
             m = self.produce(c_img, motor_babbling)
@@ -516,6 +517,7 @@ class FILearner(Learner):
 
             if self.n_motor_babbling > 0:
                 motor_babbling = True
+                self.n_motor_babbling -= 1
             else:
                 motor_babbling = False
             m = self.produce(c_ball_state, motor_babbling)
