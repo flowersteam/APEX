@@ -291,13 +291,6 @@ class MUGLLearner(Learner):
         # Normalize data
         context = np.array(context) / 249.0
 
-        if self.debug:
-            # We check the reconstruction by the representation
-            self.representation.act(X_pred=context)
-            reconstruction = self.representation.prediction[0].transpose(1, 2, 0)
-            scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
-            scipy.misc.imsave('/home/flowers/Documents/tests/reconstruction' + str(self.t) + '.jpeg', reconstruction)
-
         if np.random.random() < self.eps_motor_babbling or motor_babbling:
             self.mid_control = None
             self.chosen_modules.append("motor_babbling")
@@ -338,9 +331,15 @@ class MUGLLearner(Learner):
 
         if self.debug:
             # We check the reconstruction by the representation
+            # Reconstruct context
             self.representation.act(X_pred=context_sensori)
-            reconstruction = self.representation.prediction[0].transpose(1, 2, 0)
-            scipy.misc.imsave('/home/flowers/Documents/tests/sensori' + str(self.t) + '.jpeg', reconstruction)
+            context_recons = self.representation.prediction[0].transpose(1, 2, 0)
+            scipy.misc.imsave('/home/flowers/Documents/tests/context_recons' + str(self.t) + '.jpeg', context_recons)
+            scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
+            # Reconstruct outcome
+            outcome_recons = self.representation.prediction[1].transpose(1, 2, 0)
+            scipy.misc.imsave('/home/flowers/Documents/tests/context_recons' + str(self.t) + '.jpeg', outcome_recons)
+            scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', outcome)
 
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
