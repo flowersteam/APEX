@@ -63,7 +63,7 @@ if __name__ == "__main__":
     mover = ErgoDMP(timesteps, n_dmps)
     point = [0, 0, 0, 0, 0, 0]
     mover.move_to(list(point), duration=1)
-    m = np.random.randn(dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
+    m = np.random.uniform(-1, 1, dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
     normalized_traj = dmp.trajectory(m)
     normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
     traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # Perturbing trajectory
     point = [0, 0, 0, 0, 0, 0]
     mover.move_to(list(point), duration=1)
-    m = np.random.randn(m, 0.2)
+    m = np.random.normal(m, 0.2)
     normalized_traj = dmp.trajectory(m)
     normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
     traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (
