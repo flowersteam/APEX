@@ -20,15 +20,26 @@ class ErgoDMP(object):
         rospy.wait_for_service(execute_service)
         self.execute = rospy.ServiceProxy(execute_service, ExecuteTrajectory)
 
-    def move_to(self, point, duration=0.4):
-        service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
-        rospy.wait_for_service(service)
-        reach = rospy.ServiceProxy(service, ReachTarget)
+        self._reach_service_name = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
+        rospy.wait_for_service(self._reach_service_name)
+        self._reach_service_prox = rospy.ServiceProxy(self._reach_service_name, ReachTarget)
+
+    # def move_to(self, point, duration=0.4):
+    #     service = '/{}/poppy_ergo_jr/reach'.format(self.apex_name)
+    #     rospy.wait_for_service(service)
+    #     reach = rospy.ServiceProxy(service, ReachTarget)
+    #     reach_jointstate = JointState(position=point, name=["m{}".format(i) for i in range(1, 7)])
+    #     reach_request = ReachTargetRequest(target=reach_jointstate,
+    #                                        duration=rospy.Duration(duration))
+    #     reach(reach_request)
+    #     rospy.sleep(duration)
+
+    def move_to(self, point, duration=0.2):
         reach_jointstate = JointState(position=point, name=["m{}".format(i) for i in range(1, 7)])
         reach_request = ReachTargetRequest(target=reach_jointstate,
                                            duration=rospy.Duration(duration))
-        reach(reach_request)
-        rospy.sleep(duration)
+        self._reach_service_prox(reach_request)
+        rospy.sleep(duration - 0.05)
 
     def execute_traj(self, traj):
         traj_request = self.matrix_to_trajectory_msg(traj)
@@ -48,19 +59,37 @@ class ErgoDMP(object):
 if __name__ == "__main__":
     n_dmps = 6
     n_bfs = 7
-    timesteps = 30
-    max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
-    bounds_motors_max = np.array([180, 10, 20, 10, 30, 30])
-    bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
+    # Old values
+    # timesteps = 30
+    # max_params = np.array([300.] * n_bfs * n_dmps + [1.] * n_dmps)
+    # bounds_motors_max = np.array([180, 10, 20, 10, 30, 30])
+    # bounds_motors_min = np.array([-180, -20, -20, -15, -20, -20])
+    # New values
+    timesteps = 40
+    max_params = np.array([200.] * n_bfs * n_dmps + [1.] * n_dmps)
+    bounds_motors_max = np.array([180, 0, 30, 70, 20, 70])
+    bounds_motors_min = np.array([-180, -40, -50, -70, -50, -50])
     dmp = MyDMP(n_dmps=n_dmps, n_bfs=n_bfs, timesteps=timesteps, max_params=max_params)
 
     mover = ErgoDMP(timesteps, n_dmps)
     point = [0, 0, 0, 0, 0, 0]
     mover.move_to(list(point), duration=1)
-    m = np.random.randn(dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
+    m = np.random.uniform(-1, 1, dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
     normalized_traj = dmp.trajectory(m)
     normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
-    traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (bounds_motors_max - bounds_motors_min) + bounds_motors_min
-    mover.execute_traj(traj)
-    # for m in traj:
-    #     mover.move_to(list(m))
+    traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (
+                bounds_motors_max - bounds_motors_min) + bounds_motors_min
+    # mover.execute_traj(traj)
+    for motors in traj:
+        mover.move_to(list(motors))
+    # Perturbing trajectory
+    point = [0, 0, 0, 0, 0, 0]
+    mover.move_to(list(point), duration=1)
+    m = np.random.normal(m, 0.2)
+    normalized_traj = dmp.trajectory(m)
+    normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
+    traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (
+                bounds_motors_max - bounds_motors_min) + bounds_motors_min
+    # mover.execute_traj(traj)
+    for motors in traj:
+        mover.move_to(list(motors))
