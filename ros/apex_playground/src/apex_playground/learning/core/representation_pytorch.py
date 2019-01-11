@@ -826,10 +826,10 @@ ArmBallsBetaVAE.load_model(model_path)
 
 # Poppy representations
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_ent'
-PoppimageVAE10 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='cnn',
+PoppimageVAE10 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
                                                n_channels=3, height=64, width=64, batch_size=256)
 PoppimageVAE10.load_model(model_path)
-PoppimageVAE10.sorted_latents = np.array([1, 2, 8, 3, 6, 5, 4, 0, 7, 9])
+PoppimageVAE10.sorted_latents = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_ent20'
 PoppimageVAE20 = PytorchBetaVAERepresentation(n_latents=20, initial_epochs=0, beta=1, network_type='darlacnn',

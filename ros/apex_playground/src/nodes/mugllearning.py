@@ -540,7 +540,7 @@ if __name__ == "__main__":
     parser.add_argument('--trial', type=int, help='Trial number')
     parser.add_argument('--n_iter', metavar='-n', type=int, help='Number of exploration iterations')
     parser.add_argument('--n_modules', type=int, default=5, help='Number of modules for MUGL learning')
-    parser.add_argument('--explo_noise', type=float, default=0.1, help='Exploration noise')
+    parser.add_argument('--explo_noise', type=float, default=0.2, help='Exploration noise')
     parser.add_argument('--eps_motor_babbling', type=float, default=0.1, help='Proportion of random motor command')
     parser.add_argument('--n_motor_babbling', type=int, default=100, help='Number of random motor babbling iterations')
     parser.add_argument('--eps', type=float, default=0.1, help='Proportion of random modules chosen')
