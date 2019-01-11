@@ -338,8 +338,8 @@ class MUGLLearner(Learner):
             scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', context)
             # Reconstruct outcome
             outcome_recons = self.representation.prediction[1].transpose(1, 2, 0)
-            scipy.misc.imsave('/home/flowers/Documents/tests/context_recons' + str(self.t) + '.jpeg', outcome_recons)
-            scipy.misc.imsave('/home/flowers/Documents/tests/context' + str(self.t) + '.jpeg', outcome)
+            scipy.misc.imsave('/home/flowers/Documents/tests/outcome_recons' + str(self.t) + '.jpeg', outcome_recons)
+            scipy.misc.imsave('/home/flowers/Documents/tests/outcome' + str(self.t) + '.jpeg', outcome)
 
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
