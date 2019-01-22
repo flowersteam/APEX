@@ -582,11 +582,11 @@ SupPoppimage10_B20_C20_D600 = PytorchBetaVAERepresentation(n_latents=10, initial
 SupPoppimage10_B20_C20_D600.load_model(model_path)
 SupPoppimage10_B20_C20_D600.sorted_latents = np.array([3, 1, 2, 0, 4, 5, 7, 8, 9, 6])
 
-# model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/Poppimage_ent'
-# SupPoppimage10_B20_C20_D600 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, n_channels=3,
-#                                                            dim_ergo=1, batch_size=256)
-# SupPoppimage10_B20_C20_D600.load_model(model_path)
-# SupPoppimage10_B20_C20_D600.sorted_latents = np.array([3, 1, 2, 0, 4, 5, 7, 6, 8, 9])
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/SupPoppimage10_B20_C20_D800'
+SupPoppimage10_B20_C20_D800 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, n_channels=3,
+                                                           dim_ergo=1, batch_size=256)
+SupPoppimage10_B20_C20_D800.load_model(model_path)
+SupPoppimage10_B20_C20_D800.sorted_latents = np.array([3, 0, 1, 4, 2, 7, 9, 6, 5, 8])
 
 
 if __name__ == '__main__':
