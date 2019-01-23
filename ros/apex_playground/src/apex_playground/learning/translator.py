@@ -148,7 +148,7 @@ class EnvironmentTranslator(object):
         return list(s_normalized)
 
     def matrix_to_trajectory_msg(self, matrix_traj):
-        assert matrix_traj.shape == (self.timesteps, self.n_dmps)
+        assert matrix_traj.shape == (self.timesteps, self.motor_dims)
         traj = JointTrajectory()
         traj.header.stamp = rospy.Time.now()
         traj.joint_names = ['l_shoulder_y', 'l_shoulder_x', 'l_arm_z', 'l_elbow_y']
@@ -159,5 +159,5 @@ class EnvironmentTranslator(object):
 
     def trajectory_msg_to_matrix(self, trajectory):
         matrix = np.array([point.positions for point in trajectory.points])
-        assert matrix.shape == (self.timesteps, self.n_dmps)
+        assert matrix.shape == (self.timesteps, self.motor_dims)
         return matrix
