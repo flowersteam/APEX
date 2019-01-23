@@ -138,8 +138,8 @@ class Perception(object):
                              "sensorial": sensorial.ros_to_dict(sensorial_points[point]),
                              "type": type} for point in range(request.nb_points.data)]
 
-            with open(join(folder_traj, "iteration_{}.json".format(iteration)), 'w') as f:
-                json.dump(trajectories, f)
+            #with open(join(folder_traj, "iteration_{}.json".format(iteration)), 'w') as f:
+            #    json.dump(trajectories, f)
 
         except rospy.exceptions.ROSInterruptException:
             rospy.logwarn("recording aborted!")
