@@ -145,14 +145,14 @@ class Supervisor(object):
         interests = {}
         for mid in self.modules.keys():
             interests[mid] = np.float16(self.interests_evolution[mid][i])
-        return {"ms":np.array(self.ms, dtype=np.float16)[range(164) + range(304, 344)],
+        return {"ms":np.array(self.ms, dtype=np.float16)[range(self.conf.m_ndims+132) + range(self.conf.m_ndims+272, self.conf.m_ndims+self.conf.s_ndims)],
                 "chosen_module":self.chosen_modules[i],
                 "goal":self.goals[i],
                 "interests": interests}
 
     def forward_iteration(self, data_iteration):
-        ms = np.zeros(344)
-        ms[range(164) + range(304, 344)] = data_iteration["ms"]        
+        ms = np.zeros(self.conf.m_ndims+self.conf.s_ndims)
+        ms[range(self.conf.m_ndims+132) + range(self.conf.m_ndims+272, self.conf.m_ndims+self.conf.s_ndims)] = data_iteration["ms"]        
         m = self.get_m(ms)
         chosen_mid = data_iteration["chosen_module"]
         sg = data_iteration["goal"]
