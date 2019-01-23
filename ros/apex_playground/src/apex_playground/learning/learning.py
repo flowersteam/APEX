@@ -79,7 +79,7 @@ class Learning(object):
             filename = "iteration_" + str(iteration) + ".pickle"
             with open(os.path.join(folder_trial, filename), 'w') as f:
                 pickle.dump(self.agent.save_iteration(iteration), f)
-                
+            return True
             # Check saved file
             #try:
             #    with open(os.path.join(folder_trial, filename), 'r') as f:
