@@ -1,4 +1,3 @@
-from .dmp.mydmp import MyDMP
 from explauto.utils import bounds_min_max
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 from rospkg import RosPack
@@ -6,6 +5,31 @@ from os.path import join
 import json
 import numpy as np
 import rospy
+
+
+class GRBFTrajectory(object):
+    def __init__(self, n_dims, sigma, steps_per_basis, max_basis):
+        self.n_dims = n_dims
+        self.sigma = sigma
+        self.alpha = - 1. / (2. * self.sigma ** 2.)
+        self.steps_per_basis = steps_per_basis
+        self.max_basis = max_basis
+        self.precomputed_gaussian = np.zeros(2 * self.max_basis * self.steps_per_basis)
+        for i in range(2 * self.max_basis * self.steps_per_basis):
+            self.precomputed_gaussian[i] = self.gaussian(self.max_basis * self.steps_per_basis, i)
+        
+    def gaussian(self, center, t):
+        return np.exp(self.alpha * (center - t) ** 2.)
+    
+    def trajectory(self, weights):
+        n_basis = len(weights)//self.n_dims
+        weights = np.reshape(weights, (n_basis, self.n_dims)).T
+        steps = self.steps_per_basis * n_basis
+        traj = np.zeros((steps, self.n_dims))
+        for step in range(steps):
+            g = self.precomputed_gaussian[self.max_basis * self.steps_per_basis + self.steps_per_basis - 1 - step::self.steps_per_basis][:n_basis]
+            traj[step] = np.dot(weights, g)
+        return np.clip(traj, -1., 1.)
 
 
 class EnvironmentTranslator(object):
@@ -29,26 +53,37 @@ class EnvironmentTranslator(object):
         self.bounds_sensory_max = np.array([float(self.bounds['sensory']['ergo'][0][1]), float(self.bounds['sensory']['ball'][0][1])] + self.bounds_sensory_max)
         self.bounds_sensory_diff = self.bounds_sensory_max - self.bounds_sensory_min
 
+        # RBF PARAMETERS
+        self.motor_dims = 4
+        self.steps_per_basis = 6
+        self.sigma = self.steps_per_basis // 2
+        self.max_basis = 5
+
+        self.trajectory_generator = GRBFTrajectory(self.motor_dims,
+                                                   self.sigma,
+                                                   self.steps_per_basis,
+                                                   self.max_basis)
         # DMP PARAMETERS
-        self.n_dmps = 4
-        self.n_bfs = 7
+        #self.n_dmps = 4
+        #self.n_bfs = 7
         self.timesteps = 30
-        self.max_params = np.array([300.] * self.n_bfs * self.n_dmps + [1.] * self.n_dmps)
-        self.motor_dmp = MyDMP(n_dmps=self.n_dmps, n_bfs=self.n_bfs, timesteps=self.timesteps, max_params=self.max_params)
+        #self.max_params = np.array([300.] * self.n_bfs * self.n_dmps + [1.] * self.n_dmps)
+        #self.motor_dmp = MyDMP(n_dmps=self.n_dmps, n_bfs=self.n_bfs, timesteps=self.timesteps, max_params=self.max_params)
         self.context = {}
-        self.config = dict(m_mins=[-1.]*32,
-                           m_maxs=[1.]*32,
+        self.config = dict(m_mins=[-1.]*20,
+                           m_maxs=[1.]*20,
                            s_mins=[-1.]*312,
                            s_maxs=[1.]*312)
 
     def trajectory_to_w(self, m_traj):
+        raise NotImplementedError
         assert m_traj.shape == (self.timesteps, self.n_dmps)
         normalized_traj = ((m_traj - self.bounds_motors_min) / (self.bounds_motors_max - self.bounds_motors_min)) * 2 + np.array([-1.]*self.n_dmps)
         return self.motor_dmp.imitate(normalized_traj) / self.max_params
 
     def w_to_trajectory(self, w):
-        normalized_traj = bounds_min_max(self.motor_dmp.trajectory(np.array(w) * self.max_params), self.n_dmps * [-1.], self.n_dmps * [1.])
-        return ((normalized_traj - np.array([-1.]*self.n_dmps))/2.) * (self.bounds_motors_max - self.bounds_motors_min) + self.bounds_motors_min
+        normalized_traj = self.trajectory_generator.trajectory(np.array(w))
+        return ((normalized_traj - np.array([-1.]*self.motor_dims))/2.) * (self.bounds_motors_max - self.bounds_motors_min) + self.bounds_motors_min
 
     def get_context(self, state):
         return [state.ergo.angle, state.ball.angle]
