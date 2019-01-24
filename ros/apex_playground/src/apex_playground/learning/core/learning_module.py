@@ -153,7 +153,7 @@ class LearningModule(Agent):
         
     def competence(self): return self.interest_model.competence()
     def progress(self): return self.interest_model.progress()
-    def interest(self): return self.interest_model.interest()
+    def interest(self): return self.interest_model.current_interest
     
 
     def perceive(self, m, s):
