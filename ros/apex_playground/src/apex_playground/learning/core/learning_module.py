@@ -35,7 +35,7 @@ class LearningModule(Agent):
         self.s = None
         self.last_interest = 0
         
-        if context_mode is not None:
+        if context_mode is None:
             self.im = MiscRandomInterest(self.conf, 
                                          self.conf.s_dims, 
                                          self.n_sdims, 
