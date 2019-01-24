@@ -29,7 +29,8 @@ class LearningModule(Agent):
         self.context_mode = context_mode
         self.s_space = s_space
         self.motor_babbling_n_iter = 0
-        
+        self.n_sdims = len(s_space)
+
         self.s = None
         self.last_interest = 0
         
