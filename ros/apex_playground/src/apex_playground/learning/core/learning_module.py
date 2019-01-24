@@ -146,7 +146,7 @@ class LearningModule(Agent):
     
     def update_im(self, m, s):
         if self.t >= self.motor_babbling_n_iter:
-            return self.interest_model.update(hstack((m, self.s)), hstack((m, s)))
+            return self.interest_model.update(self.s, s)
         
     def competence(self): return self.interest_model.competence()
     def progress(self): return self.interest_model.progress()
