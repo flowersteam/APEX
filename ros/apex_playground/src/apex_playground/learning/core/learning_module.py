@@ -40,11 +40,11 @@ class LearningModule(Agent):
                                          self.n_sdims, 
                                          win_size=100)
         else:
-            self.im = MiscRandomInterest(self.conf, 
-                                         self.conf.s_dims, 
-                                         self.n_sdims, 
-                                         100,
-                                         context_mode)
+            self.im = ContextRandomInterest(self.conf, 
+                                            self.conf.s_dims, 
+                                            self.n_sdims, 
+                                            100,
+                                            context_mode)
             
         
         #self.im = im_cls(self.conf, self.im_dims, **kwargs)
