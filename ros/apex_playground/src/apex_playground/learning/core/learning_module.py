@@ -10,6 +10,8 @@ from explauto.exceptions import ExplautoBootstrapError
 from sensorimotor_model import DemonstrableNN
 from interest_model import MiscRandomInterest, ContextRandomInterest
 
+from dataset import BufferedDataset
+
 
 class LearningModule(Agent):
     def __init__(self, mid, m_space, s_space, env_conf, explo_noise=0., normalize_interests=True, context_mode=None):
@@ -32,24 +34,26 @@ class LearningModule(Agent):
         self.last_interest = 0
         
         if context_mode is not None:
-            im_cls, kwargs = (ContextRandomInterest, {
-                               'win_size': 50,
-                               'competence_mode': 'knn',
-                               'k': 20,
-                               'progress_mode': 'local',
-                               'context_mode':context_mode})
+            self.im = MiscRandomInterest(self.conf, 
+                                         self.conf.s_dims, 
+                                         self.n_sdims, 
+                                         win_size=100)
         else:
-            im_cls, kwargs = (MiscRandomInterest, {
-                               'win_size': 50,
-                               'competence_mode': 'knn',
-                               'k': 20,
-                               'progress_mode': 'local'})
+            self.im = MiscRandomInterest(self.conf, 
+                                         self.conf.s_dims, 
+                                         self.n_sdims, 
+                                         100,
+                                         context_mode)
             
         
-        self.im = im_cls(self.conf, self.im_dims, **kwargs)
+        #self.im = im_cls(self.conf, self.im_dims, **kwargs)
         
-        sm_cls, kwargs = (DemonstrableNN, {'fwd': 'NN', 'inv': 'NN', 'sigma_explo_ratio':explo_noise})
-        self.sm = sm_cls(self.conf, **kwargs)
+        self.sm = BufferedDataset(self.conf.m_ndims, 
+                                  self.conf.s_ndims,
+                                  buffer_size=10000,
+                                  lateness=10)
+        #sm_cls, kwargs = (DemonstrableNN, {'fwd': 'NN', 'inv': 'NN', 'sigma_explo_ratio':explo_noise})
+        #self.sm = sm_cls(self.conf, **kwargs)
         
         Agent.__init__(self, self.conf, self.sm, self.im, context_mode=self.context_mode)
         
@@ -93,56 +97,53 @@ class LearningModule(Agent):
         ms[self.mconf['s']] = s
         return ms          
     
-    def inverse(self, s, explore=False):
-        m,_ = self.infer(self.conf.s_dims, self.conf.m_dims, s, pref='', explore=explore)
-        return self.motor_primitive(m)
-        
-    def infer(self, expl_dims, inf_dims, x, pref='', n=1, explore=True):      
-        try:
-            if self.n_bootstrap > 0:
-                self.n_bootstrap -= 1
-                raise ExplautoBootstrapError
-            mode = "explore" if explore else "exploit"
-            if n == 1:
-                self.sensorimotor_model.mode = mode
-                m = self.sensorimotor_model.infer(expl_dims, inf_dims, x.flatten())
+    def inverse(self, sg, explore=True):
+        # Get nearest neighbor
+        if len(self.sm):
+            _, idx = self.sm.nn_y(sg)
+            m = np.array(self.sm.get_x(idx[0]))
+            snn = self.sm.get_y(idx[0])
+        else:
+            return self.motor_babbling()
+        # Add Exploration Noise
+        if explore:
+            if self.optim_explo:
+                # Detect Movement
+                snn_steps = len(snn) // self.n_sdims
+                if snn_steps == 1:
+                    explo_vect = [self.explo_noise]*len(m)
+                else:
+                    move_step = snn_steps
+                    for i in range(1, snn_steps):
+                        if abs(snn[self.n_sdims * i] - snn[self.n_sdims * (i-1)]) > 0.01:
+                            #Move at step i
+                            move_step = i
+                            break
+                    # Explore after Movement detection
+                    if move_step == 1 or move_step == snn_steps:
+                        start_explo = 0
+                    else:
+                        start_explo = move_step
+                    explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps-start_explo) * self.n_mdims
+                    
             else:
-                self.sensorimotor_model.mode = mode
-                m = []
-                for _ in range(n):
-                    m.append(self.sensorimotor_model.infer(expl_dims, inf_dims, x.flatten()))
-            self.emit(pref + 'inference' + '_' + self.mid, m)
-        except ExplautoBootstrapError:
-            if n == 1:
-                m = rand_bounds(self.conf.bounds[:, inf_dims]).flatten(), -1
-            else:
-                m = rand_bounds(self.conf.bounds[:, inf_dims], n), -1
+                explo_vect = [self.explo_noise]*len(m)
+            m = np.random.normal(m, explo_vect).clip(-1.,1.)
         return m
             
-    def produce(self, context=None, j_sm=None, explore=True):
+    def produce(self, context=None, explore=True):
         if self.t < self.motor_babbling_n_iter:
             self.m = self.motor_babbling()
             self.s = np.zeros(len(self.s_space))
             self.x = np.zeros(len(self.expl_dims))
         else:
             self.x = self.choose(context)
-            m, idx = self.infer(self.expl_dims, self.inf_dims, self.x, explore=explore)
-            if idx<0:
-                self.y = m
-            else:
-                #print "use demonstrated point ", idx
-                self.y = j_sm.inverse_idx(idx)
-                
-            #self.m, self.s = self.extract_ms(self.x, self.y)
-            self.m, sg = self.y, self.x#self.extract_ms(self.x, self.y)
-            #self.m = self.motor_primitive(self.m)
-            
-            self.s = sg
-            #self.emit('movement' + '_' + self.mid, self.m)          
+            self.y = self.inverse(self.x, explore=explore)
+            self.m, self.s = self.y, self.x         
         return self.m        
     
     def update_sm(self, m, s): 
-        self.sensorimotor_model.update(m, s)   
+        self.sm.add_xy(m, s)
         self.t += 1 
     
     def update_im(self, m, s):

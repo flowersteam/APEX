@@ -338,11 +338,10 @@ class Supervisor(object):
                     explore = False
                 self.measure_interest = True 
 
-            j_sm = self.modules["mod2"].sensorimotor_model
             if self.modules[mid].context_mode is None:
-                self.m = self.modules[mid].produce(j_sm=j_sm, explore=explore)
+                self.m = self.modules[mid].produce(explore=explore)
             else:                     
-                self.m = self.modules[mid].produce(context=np.array(context)[range(self.modules[mid].context_mode["context_n_dims"])], j_sm=j_sm, explore=explore)
+                self.m = self.modules[mid].produce(context=np.array(context)[range(self.modules[mid].context_mode["context_n_dims"])], explore=explore)
             return self.m
     
     def inverse(self, mid, s, context):
@@ -366,32 +365,18 @@ class Supervisor(object):
     def perceive(self, s, m_demo=None, j_demo=False):
         s = self.sensory_primitive(s)
         #print "perceive len(s)", len(s), s[92:112]
-        if j_demo or self.ball_moves(s[92:112]):
-            rospy.sleep(5)
-        if m_demo is not None:
-            ms = self.set_ms(m_demo, s)
-            self.update_sensorimotor_models(ms)
-            self.have_to_replay_arm_demo = m_demo
-            self.chosen_modules.append("m_demo")
-        elif j_demo:
-            m0 = [0]*self.conf.m_ndims
-            m0s = self.set_ms(m0, s[:2] + [0]*30 + s[2:])
-            for mid in self.modules.keys():
-                if not (mid == "mod1"): # don't update hand model
-                    self.modules[mid].update_sm(self.modules[mid].get_m(m0s), self.modules[mid].get_s(m0s))
-            self.chosen_modules.append("j_demo")
+        if self.ball_moves(s[92:112]):
+            rospy.sleep(3)
+        if not hasattr(self, "m"):
+            return False
+        self.ms = self.set_ms(self.m, s)
+        self.update_sensorimotor_models(self.ms)
+        if self.mid_control is not None and self.measure_interest:
+            self.modules[self.mid_control].update_im(self.modules[self.mid_control].get_m(self.ms), self.modules[self.mid_control].get_s(self.ms))
+        if self.mid_control is not None and self.measure_interest and self.modules[self.mid_control].t >= self.modules[self.mid_control].motor_babbling_n_iter:
+            self.goals.append(self.modules[self.mid_control].s)
         else:
-            if not hasattr(self, "m"):
-                return False
-            ms = self.set_ms(self.m, s)
-            self.ms = ms
-            self.update_sensorimotor_models(ms)
-            if self.mid_control is not None and self.measure_interest:
-                self.modules[self.mid_control].update_im(self.modules[self.mid_control].get_m(ms), self.modules[self.mid_control].get_s(ms))
-            if self.mid_control is not None and self.measure_interest and self.modules[self.mid_control].t >= self.modules[self.mid_control].motor_babbling_n_iter:
-                self.goals.append(self.modules[self.mid_control].s)
-            else:
-                self.goals.append(None)
+            self.goals.append(None)
         self.t = self.t + 1
         
         for mid in self.modules.keys():
