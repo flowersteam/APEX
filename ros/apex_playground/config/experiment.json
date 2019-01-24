@@ -6,7 +6,7 @@
         "progress": [
             {
                 "status": "taken", 
-                "iteration": 13, 
+                "iteration": 8, 
                 "worker": 5
             }
         ]
@@ -18,17 +18,17 @@
         "progress": [
             {
                 "status": "taken", 
-                "iteration": 0, 
+                "iteration": 1, 
                 "worker": 4
             }, 
             {
                 "status": "taken", 
-                "iteration": 0, 
+                "iteration": 3, 
                 "worker": 1
             }, 
             {
                 "status": "taken", 
-                "iteration": 0, 
+                "iteration": 2, 
                 "worker": 2
             }, 
             {
@@ -38,7 +38,7 @@
             }, 
             {
                 "status": "taken", 
-                "iteration": 0, 
+                "iteration": 1, 
                 "worker": 3
             }
         ]
