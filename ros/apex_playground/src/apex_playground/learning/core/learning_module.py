@@ -30,6 +30,7 @@ class LearningModule(Agent):
         self.s_space = s_space
         self.motor_babbling_n_iter = 0
         self.n_sdims = len(s_space)
+        self.explo_noise = 0.05
 
         self.s = None
         self.last_interest = 0
