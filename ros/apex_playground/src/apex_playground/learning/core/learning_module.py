@@ -113,7 +113,7 @@ class LearningModule(Agent):
         # Add Exploration Noise
         if explore:
             # Detect Movement
-            snn_steps = len(snn) // self.n_sdims
+            snn_steps = 10
             move_step = snn_steps
             for i in range(1, snn_steps):
                 if abs(snn[self.n_sdims * i] - snn[self.n_sdims * (i-1)]) > 0.01:
