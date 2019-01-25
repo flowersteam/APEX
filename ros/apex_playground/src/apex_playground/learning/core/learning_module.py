@@ -125,7 +125,7 @@ class LearningModule(Agent):
                 start_explo = 0
             else:
                 start_explo = (move_step + 1) // 2
-            explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps-start_explo) * self.n_mdims
+            explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps//2-start_explo) * self.n_mdims
             
             rospy.loginfo("Explonoise: " + str(snn_steps) + str(move_step) + str(snn) + str(explo_vect) + str(m))
             m = np.random.normal(m, explo_vect).clip(-1.,1.)
