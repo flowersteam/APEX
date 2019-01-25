@@ -12,7 +12,7 @@ from interest_model import MiscRandomInterest, ContextRandomInterest
 
 from dataset import BufferedDataset
 
-import rospyZ
+import rospy
 
 
 class LearningModule(Agent):
