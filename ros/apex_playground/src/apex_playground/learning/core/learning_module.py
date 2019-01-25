@@ -12,7 +12,7 @@ from interest_model import MiscRandomInterest, ContextRandomInterest
 
 from dataset import BufferedDataset
 
-import rospy
+import rospyZ
 
 
 class LearningModule(Agent):
@@ -31,7 +31,8 @@ class LearningModule(Agent):
         self.context_mode = context_mode
         self.s_space = s_space
         self.motor_babbling_n_iter = 0
-        self.n_sdims = len(s_space)
+        self.n_mdims = 4
+        self.n_sdims = len(s_space) // 10
         self.explo_noise = 0.05
 
         self.s = None
@@ -123,7 +124,7 @@ class LearningModule(Agent):
             if move_step == 1 or move_step == snn_steps:
                 start_explo = 0
             else:
-                start_explo = move_step
+                start_explo = (move_step + 1) // 2
             explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps-start_explo) * self.n_mdims
             
             rospy.loginfo("Explonoise: " + str(snn_steps) + str(move_step) + str(snn) + str(explo_vect) + str(m))
