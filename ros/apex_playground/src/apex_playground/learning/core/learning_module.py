@@ -12,6 +12,8 @@ from interest_model import MiscRandomInterest, ContextRandomInterest
 
 from dataset import BufferedDataset
 
+import rospy
+
 
 class LearningModule(Agent):
     def __init__(self, mid, m_space, s_space, env_conf, explo_noise=0., normalize_interests=True, context_mode=None):
@@ -111,22 +113,22 @@ class LearningModule(Agent):
         if explore:
             # Detect Movement
             snn_steps = len(snn) // self.n_sdims
-            if snn_steps == 1:
-                explo_vect = [self.explo_noise]*len(m)
+            move_step = snn_steps
+            for i in range(1, snn_steps):
+                if abs(snn[self.n_sdims * i] - snn[self.n_sdims * (i-1)]) > 0.01:
+                    #Move at step i
+                    move_step = i
+                    break
+            # Explore after Movement detection
+            if move_step == 1 or move_step == snn_steps:
+                start_explo = 0
             else:
-                move_step = snn_steps
-                for i in range(1, snn_steps):
-                    if abs(snn[self.n_sdims * i] - snn[self.n_sdims * (i-1)]) > 0.01:
-                        #Move at step i
-                        move_step = i
-                        break
-                # Explore after Movement detection
-                if move_step == 1 or move_step == snn_steps:
-                    start_explo = 0
-                else:
-                    start_explo = move_step
-                explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps-start_explo) * self.n_mdims
+                start_explo = move_step
+            explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps-start_explo) * self.n_mdims
+            
+            rospy.loginfo("Explonoise: " + str(snn_steps) + str(move_step) + str(snn) + str(explo_vect) + str(m))
             m = np.random.normal(m, explo_vect).clip(-1.,1.)
+            rospy.loginfo("New m:" + str(m))
         return m
             
     def produce(self, context=None, explore=True):

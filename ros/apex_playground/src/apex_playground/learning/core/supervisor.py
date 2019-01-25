@@ -4,6 +4,8 @@ from explauto.utils import rand_bounds, bounds_min_max, softmax_choice, prop_cho
 from explauto.utils.config import make_configuration
 from learning_module import LearningModule
 
+import rospy
+
 
 class Supervisor(object):
     def __init__(self, config, babbling_mode="active", n_motor_babbling=0.1, explo_noise=0.05, choice_eps=0.2, normalize_interests=True):
@@ -186,6 +188,8 @@ class Supervisor(object):
         interests = {}
         for mid in self.modules.keys():
             interests[mid] = self.modules[mid].interest()
+        
+        rospy.loginfo(("Interests: ", interests))
         
         if mode == 'random':
             mid = np.random.choice(interests.keys())
