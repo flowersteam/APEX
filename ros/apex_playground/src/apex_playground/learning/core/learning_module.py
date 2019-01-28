@@ -33,7 +33,7 @@ class LearningModule(Agent):
         self.motor_babbling_n_iter = 0
         self.n_mdims = 4
         self.n_sdims = len(s_space) // 10
-        self.explo_noise = 0.05
+        self.explo_noise = 0.2
 
         self.s = None
         self.last_interest = 0
@@ -124,7 +124,7 @@ class LearningModule(Agent):
             if move_step == 1 or move_step == snn_steps:
                 start_explo = 0
             else:
-                start_explo = (move_step + 1) // 2
+                start_explo = (move_step) // 2
             explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps//2-start_explo) * self.n_mdims
             
             rospy.loginfo("Explonoise: " + str(snn_steps) + str(move_step) + str(snn) + str(explo_vect) + str(m))
