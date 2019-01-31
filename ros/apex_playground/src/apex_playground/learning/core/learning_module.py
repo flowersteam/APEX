@@ -127,6 +127,11 @@ class LearningModule(Agent):
                 start_explo = (move_step) // 2
             explo_vect = [0.] * start_explo * self.n_mdims + [self.explo_noise]*(snn_steps//2-start_explo) * self.n_mdims
             
+            # After object moves, noise around previous position
+            if start_explo > 0:
+                for i in range(start_explo, 5):
+                    m[i * self.n_mdims:(i+1) * self.n_mdims] = m[(start_explo-1) * self.n_mdims:start_explo * self.n_mdims]
+
             rospy.loginfo("Explonoise: " + str(snn_steps) + str(move_step) + str(snn) + str(explo_vect) + str(m))
             m = np.random.normal(m, explo_vect).clip(-1.,1.)
             rospy.loginfo("New m:" + str(m))
