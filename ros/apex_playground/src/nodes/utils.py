@@ -94,8 +94,7 @@ class BallTracker(object):
 
     def get_state(self, ball_center, arena_center):
         """
-        Reduce the current configuration of the ball in (angle, theta)
-        :return: a CircularState
+        Return the current configuration of the ball in (angle, theta)
         """
         x, y = (ball_center[0] - arena_center[0], ball_center[1] - arena_center[1])
         elongation = sqrt(x*x + y*y)
