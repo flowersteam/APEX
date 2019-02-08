@@ -92,7 +92,7 @@ class Learner(object):
 
 
 class MUGLLearner(Learner):
-    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, n_latents,
+    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial,
                  eps_motor_babbling, n_motor_babbling, explo_noise, choice_eps, debug):
         super(MUGLLearner, self).__init__()
         self.debug = debug
@@ -113,10 +113,8 @@ class MUGLLearner(Learner):
 
         # Define motor and sensory spaces:
         m_ndims = self.conf.m_ndims  # number of motor parameters
-        latents_ndims = n_latents  # Number of latent variables in representation
 
         self.m_space = list(range(m_ndims))
-        self.s_latents = list(range(m_ndims + latents_ndims, m_ndims + 2 * latents_ndims))
 
         # Create the learning modules:
         if self.babbling_mode == "MGEVAE10":
@@ -408,8 +406,6 @@ class MUGLLearner(Learner):
             self.progresses_evolution[mid].append(self.modules[mid].progress())
             self.interests_evolution[mid].append(self.modules[mid].interest())
 
-        return True
-
     def explore(self, n_iter):
         for _ in tqdm(range(n_iter)):
             self.environment.reset()
@@ -613,7 +609,7 @@ if __name__ == "__main__":
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              n_latents=10, experiment_name=args.exp_name, trial=args.trial,
+                              experiment_name=args.exp_name, trial=args.trial,
                               eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
                               explo_noise=args.explo_noise, choice_eps=args.eps,
                               debug=args.debug)
@@ -623,7 +619,7 @@ if __name__ == "__main__":
                       s_mins=[-2.5] * 40,
                       s_maxs=[2.5] * 40)
         learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
-                              n_latents=20, experiment_name=args.exp_name, trial=args.trial,
+                              experiment_name=args.exp_name, trial=args.trial,
                               eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
                               explo_noise=args.explo_noise, choice_eps=args.eps,
                               debug=args.debug)
