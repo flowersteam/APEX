@@ -6,6 +6,7 @@ import numpy as np
 import scipy.misc
 import pickle
 import json
+import time
 from tqdm import tqdm
 
 from explauto.utils import prop_choice
@@ -382,6 +383,13 @@ class MUGLLearner(Learner):
             else:
                 self.representation.act(X_pred=context)
                 context = self.representation.representation.ravel()
+
+                if self.debug:
+	                print("Debug produce")
+	                print("module is: ", mid)
+	                print("context is: ", context)
+	                print("using latents: ", context[self.modules[mid].context_mode["context_dims"]])
+
                 self.m = self.modules[mid].produce(context=context[self.modules[mid].context_mode["context_dims"]],
                                                    explore=explore)
             return self.m
@@ -407,12 +415,24 @@ class MUGLLearner(Learner):
         self.representation.act(X_pred=context_sensori)
         context_sensori_latents = self.representation.representation.ravel()
 
+        if self.debug:
+            print("Debug perceive")
+            print("context sensory latents are: ", self.representation.representation)
+            print("using context sensory latents: ", context_sensori_latents)
+
         ms = self.set_ms(self.m, context_sensori_latents)
         self.ms = ms
         self.update_sensorimotor_models(ms)
         if self.mid_control is not None and self.measure_interest:
+            if self.debug:
+                print("updating module:", self.mid_control)
+                print("motor params are: ", self.m)
+                print("updating module with motors", self.modules[self.mid_control].get_m(ms))
+                print("updating module with latents", self.modules[self.mid_control].get_s(ms))
+
             self.modules[self.mid_control].update_im(self.modules[self.mid_control].get_m(ms),
                                                      self.modules[self.mid_control].get_s(ms))
+
         if self.mid_control is not None and self.measure_interest and self.modules[self.mid_control].t >= \
                 self.modules[self.mid_control].motor_babbling_n_iter:
             self.goals.append(self.modules[self.mid_control].s)
@@ -427,7 +447,7 @@ class MUGLLearner(Learner):
     def explore(self, n_iter):
         for _ in tqdm(range(n_iter)):
             self.environment.reset()
-            c_img, c_ball_center, c_arena_center, c_ergo_pos, _, c_extracted = self.environment.get_current_context()
+            c_img, c_ball_center, c_arena_center, c_ergo_pos, c_ball_state, c_extracted = self.environment.get_current_context()
             c_img = self.preprocess_image(c_img)
 
             if self.n_motor_babbling > 0:
@@ -437,7 +457,12 @@ class MUGLLearner(Learner):
                 motor_babbling = False
             m = self.produce(c_img, motor_babbling)
 
-            o_img, o_ball_center, o_arena_center, o_ergo_pos, _, o_extracted = self.environment.update(m)
+            o_img, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.update(m)
+            if self.debug:
+                print("Ball speed: ", abs(c_ball_state[1] - o_ball_state[1]))
+            if abs(c_ball_state[1] - o_ball_state[1]) > 0.1:
+                time.sleep(3)
+                o_img, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.get_current_context()
             o_img = self.preprocess_image(o_img)
 
             self.record((c_ball_center, c_arena_center, c_ergo_pos, c_extracted),

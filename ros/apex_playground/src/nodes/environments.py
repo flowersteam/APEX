@@ -62,9 +62,8 @@ class ArenaEnvironment(object):
         min_radius_arena = self.params['tracking']['resolution'][0] * self.params['tracking']['resolution'][1] / 2000.
         arena_center, arena_radius = self.ball_tracking.find_center('arena', frame, mask_arena, min_radius_arena)
 
-        ring_radius = int(arena_radius / self.params['tracking']['ring_divider']) if arena_radius is not None else None
-
         if self.debug:
+            ring_radius = int(arena_radius / self.params['tracking']['ring_divider']) if arena_radius is not None else None
             frame = self.ball_tracking.draw_images(frame, hsv, mask_ball, mask_arena, arena_center, ring_radius)
             time = datetime.datetime.now()
             scipy.misc.imsave('/home/flowers/Documents/tests/processed_{}.jpeg'.format(time), frame)
