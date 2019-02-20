@@ -231,6 +231,24 @@ class MUGLLearner(Learner):
                                                               [2.5] * (self.representation.n_latents // n_modules)]),
                                         explo_noise=self.explo_noise)
                 self.modules[module_id] = module
+        elif self.babbling_mode == "Semisup2VAE10":
+            self.representation = SupPoppimage10_B20_C20_D800
+            # Create one module per n_latents // n_modules
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_ball = np.array([3])
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_ball + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=1,
+                                                          context_dims=list(c_ball),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
         elif self.babbling_mode == "SupVAE10":
             self.representation = SupPoppimage10_B20_C20_D600
             c_ball = np.array([3])
@@ -570,7 +588,7 @@ class FILearner(Learner):
 
 if __name__ == "__main__":
     # Possible babbling modes: MGEVAE10, MGEVAE20, MGEBetaVAE10, MGEBetaVAE20C30, MGEBetaVAE20C50,
-    # SemisupVAE10, SupVAE10, Sup2VAE10
+    # SemisupVAE10, Semisup2VAE10, SupVAE10, Sup2VAE10
     parser = argparse.ArgumentParser(description='Perform mugl learning.')
     parser.add_argument('--exp_name', type=str, help='Experiment name (part of path to save data)')
     parser.add_argument('--babbling', type=str, help='Babbling mode')
