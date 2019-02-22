@@ -53,49 +53,21 @@ class FGB(object):
     
     def get_last_focus(self): return "all"
     def get_space_names(self): return ["all"]
-    
-    def save(self):
-        sm_data = {}
-        im_data = {}
-        for mid in self.modules.keys():
-            sm_data[mid] = self.modules[mid].sensorimotor_model.save()
-            im_data[mid] = self.modules[mid].interest_model.save()            
-        return {"sm_data":sm_data,
-                "im_data":im_data,
-                "chosen_modules":self.chosen_modules,
-                "progresses_evolution":self.progresses_evolution,
-                "interests_evolution":self.interests_evolution,
-                "normalized_interests_evolution":self.get_normalized_interests_evolution(),
-                "normalize_interests":self.normalize_interests}
 
-        
-    def forward(self, data, iteration):
-        if iteration > len(data["chosen_modules"]):
-            print "\nWARNING: asked to restart from iteration", iteration, "but only", len(data["chosen_modules"]), "are available. Restarting from iteration", len(data["chosen_modules"]), "..."
-            iteration = len(data["chosen_modules"])
-        if iteration < 0:
-            iteration = len(data["chosen_modules"])
-        self.chosen_modules = data["chosen_modules"][:iteration]
-        self.progresses_evolution = data["progresses_evolution"]
-        self.interests_evolution = data["interests_evolution"]
+    def save_iteration(self, i):
+        interests = {}
+        return {"ms":np.array(self.ms, dtype=np.float16)[range(self.conf.m_ndims+132) + range(self.conf.m_ndims+272, self.conf.m_ndims+self.conf.s_ndims)]}
+    
+    def forward_iteration(self, data_iteration):
+        ms = np.zeros(self.conf.m_ndims+self.conf.s_ndims)
+        ms[range(self.conf.m_ndims+132) + range(self.conf.m_ndims+272, self.conf.m_ndims+self.conf.s_ndims)] = data_iteration["ms"]        
+        m = self.get_m(ms)
+                
         for mid in self.modules.keys():
-            self.progresses_evolution[mid] = self.progresses_evolution[mid][:iteration]
-            self.interests_evolution[mid] = self.interests_evolution[mid][:iteration]
-        self.t = iteration
-        if data.has_key("normalize_interests"):
-            self.normalize_interests = data["normalize_interests"]
-        if iteration > 0:
-            for mid in self.modules.keys():
-                if mid == "mod1":
-                    self.modules[mid].sensorimotor_model.forward(data["sm_data"][mid], iteration-self.chosen_modules.count("j_demo"))
-                else:
-                    self.modules[mid].sensorimotor_model.forward(data["sm_data"][mid], iteration)
-                    
-                if len(self.progresses_evolution[mid]) > 0:
-                    self.modules[mid].interest_model.forward(data["im_data"][mid], self.chosen_modules.count(mid), self.progresses_evolution[mid][-1], self.interests_evolution[mid][-1])
-                else:
-                    self.modules[mid].interest_model.forward(data["im_data"][mid], self.chosen_modules.count(mid), 0, 0)
-        
+            smid = self.modules[mid].get_s(ms)
+            self.modules[mid].update_sm(m, smid)
+
+        self.t += 1
         
     def choose_babbling_module(self):
         self.chosen_modules.append("mod")
