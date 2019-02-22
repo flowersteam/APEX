@@ -3,7 +3,7 @@ import sys
 import cPickle
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 
 import brewer2mpl
 bmap = brewer2mpl.get_map('Dark2', 'qualitative', 8)
@@ -17,12 +17,12 @@ else:
 
 # PARAMS
 experiment_name = sys.argv[1]
-path = "/data/APEX/"
+path = "/data/APEX/" + experiment_name + '/'
 
-print "Experiment files:", path + experiment_name
+print "Experiment files:", path
 
-configs = dict(RMB=range(4))
-n = 6000
+configs = dict(RMB=range(12), AMB=range(11), FC=range(9), OS=range(6))
+n = 20000
 j_error = 0.2
 
 
@@ -69,8 +69,8 @@ if action == "compute":
     
     explo = {}
     explo['Hand'] = {}
-    explo['Joystick_1'] = {}
-    explo['Joystick_2'] = {}
+    explo['Joystick_L'] = {}
+    explo['Joystick_R'] = {}
     explo['Ergo'] = {}
     explo['Ball'] = {}
     explo['Light'] = {}
@@ -80,8 +80,8 @@ if action == "compute":
         
     
         explo['Hand'][config] = {}
-        explo['Joystick_1'][config] = {}
-        explo['Joystick_2'][config] = {}
+        explo['Joystick_L'][config] = {}
+        explo['Joystick_R'][config] = {}
         explo['Ergo'][config] = {}
         explo['Ball'][config] = {}
         explo['Light'][config] = {}
@@ -89,7 +89,7 @@ if action == "compute":
     
         for trial in configs[config]:
             
-            filename = path + experiment_name + '/' + experiment_name + "_" + config + "_" + str(trial) + ".pickle"
+            filename = path + experiment_name + "_" + config + "_" + str(trial) + ".pickle"
             print "\nLoading", config, trial, filename
             
             try:
@@ -162,16 +162,16 @@ if action == "compute":
         
                     
             dims = dict(Hand="mod1",
-                        Joystick_1="mod2",
-                        Joystick_2="mod3",
+                        Joystick_R="mod2",
+                        Joystick_L="mod3",
                         Ergo="mod4",
                         Ball="mod5",
                         Light="mod6",
                         Sound="mod7")
             
             cdims = dict(Hand=0,
-                        Joystick_1=0,
-                        Joystick_2=0,
+                        Joystick_L=0,
+                        Joystick_R=0,
                         Ergo=1,
                         Ball=2,
                         Light=2,
@@ -216,21 +216,26 @@ else:
             ymax = np.percentile(ys, 100, axis=0)
             ymin = np.percentile(ys, 0, axis=0)
             
-            plt.plot(x, ymean, lw=3, color=config_colors[config], label=config)
-            plt.fill_between(x, ymin, ymax, color=config_colors[config], alpha=0.2)
+            plt.plot(x, ymed, lw=5, color=config_colors[config], label=config, alpha=0.9)
+            for y in ys:
+                plt.plot(x, y, lw=2, color=config_colors[config], alpha=0.3)
+                if config == "AMB" and s_space == "Joystick_L":
+                    print y
+            #plt.fill_between(x, ymin, ymax, color=config_colors[config], alpha=0.2)
         
             
-        legend = plt.legend(frameon=True, loc="upper left", fontsize=20)
-        plt.xticks([0, 1000, 2000, 3000, 4000, 5000], ["$0$", "", "", "", "", "$5000$"], fontsize = 20)
+        legend = plt.legend(frameon=True, loc="upper left", fontsize=24)
+        plt.xticks([0, 5000, 10000, 15000, 20000], fontsize = 20)
         plt.yticks(fontsize = 20)
-        plt.xlabel("Iterations", fontsize=20)
-        plt.ylabel("Exploration \%", fontsize=20)
+        plt.xlabel("Iterations", fontsize=24)
+        plt.ylabel("Exploration \%", fontsize=24)
         frame = legend.get_frame()
         frame.set_facecolor('1.')
         frame.set_edgecolor('0.')
         
         #plt.savefig("/home/sforesti/scm/PhD/cogsci2016/include/obj-explo.pdf", format='pdf', dpi=100, bbox_inches='tight')
-        plt.savefig("/home/sforesti/scm/Flowers/NIPS2017/figs/explo_" + s_space + '.pdf', format='pdf', dpi=100, bbox_inches='tight')
+        plt.savefig(path + "/figs/explo_" + s_space + '.pdf', format='pdf', dpi=100, bbox_inches='tight')
+        #plt.savefig(path + "/figs/explo_" + s_space + '.png', format='png', dpi=100, bbox_inches='tight')
         
         
         plt.show(block=False)

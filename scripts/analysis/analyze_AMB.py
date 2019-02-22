@@ -23,10 +23,9 @@ if simu:
 else:
     
     # PARAMS
-    experiment_name = "postholidays"
+    experiment_name = "apex1268"
     path = "/data/APEX/" + experiment_name + "/"
-    configs = dict(AMB=[0, 1, 4])
-    configs = dict(AMB=[0, 1, 3, 4])
+    configs = dict(AMB=range(3))
     n = 20000
     j_error = 0.3
 
@@ -50,8 +49,8 @@ for i in configs[config]:
 
 
 labels = dict(mod1="Hand", 
-             mod2="Joystick Right", 
-             mod3="Joystick Left", 
+             mod2="Joystick R", 
+             mod3="Joystick L", 
              mod4="Ergo", 
              mod5="Ball", 
              mod6="Light", 
@@ -72,7 +71,7 @@ for i in configs["AMB"]:
         plt.plot(data[i]["interests_evolution"][mid][:n], lw=2, label=labels[mid])
     
     
-    legend = plt.legend(frameon=True, fontsize=18, loc="left")
+    legend = plt.legend(frameon=True, fontsize=16, loc="left")
     plt.xticks(fontsize = 16)
     plt.yticks(fontsize = 16)
     plt.xlabel("Iterations", fontsize=18)
@@ -82,6 +81,7 @@ for i in configs["AMB"]:
     frame.set_edgecolor('0.')
         
         
-    plt.savefig("/home/sforesti/scm/Flowers/NIPS2016/data/figs/interest_AMB_" + str(i) + '.pdf', format='pdf', dpi=100, bbox_inches='tight')
+    plt.savefig(path + "/figs/interest_AMB_" + str(i) + '.pdf', format='pdf', dpi=100, bbox_inches='tight')
+    plt.savefig(path + "/figs/interest_AMB_" + str(i) + '.png', format='png', dpi=100, bbox_inches='tight')
     plt.show(block=False)
 plt.show()

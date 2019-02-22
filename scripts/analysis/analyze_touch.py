@@ -35,15 +35,13 @@ if simu:
 else:
     
     # PARAMS
-    path = "/home/sforesti/scm/Flowers/NIPS2017/data/logs/"
-    experiment_name = "nips_4_mai"
+    experiment_name = "apex1268"
+    path = "/data/APEX/" + experiment_name + "/"
     configs = dict(RMB=3)#, RMB=3, RmB=1, FC=3, OS=3)
-    n = 5000
+    n = 20000
     j_error = 0.02
 
 
-
-n = 5000 # Iterations taken into account
 p = 10 # Number of checkpoints
 x = range(n)
 
@@ -54,7 +52,7 @@ def discovery(data, print_data=False):
     result = [0.]
     for i in range(1, n):
         x = data[i]
-        if np.linalg.norm(np.array(x)[::2] - np.mean(np.array(x)[::2])) < 0.01 and np.linalg.norm(np.array(x)[1::2] - np.mean(np.array(x)[1::2])) < 0.01:
+        if np.linalg.norm(np.array(x)[::2] - np.mean(np.array(x)[::2])) < 0.05 and np.linalg.norm(np.array(x)[1::2] - np.mean(np.array(x)[1::2])) < 0.05:
             result.append(0.)
         else:
             if print_data:
@@ -71,7 +69,7 @@ def discovery(data, print_data=False):
 s_spaces = ["Hand", "Joystick_L", "Joystick_R", "Ergo", "Ball", "Light", "Sound"]
 
 
-if True:
+if False:
 
     explo = {}
     explo_gain = {}
@@ -221,7 +219,7 @@ else:
             
                 
         legend = plt.legend(frameon=True, fontsize=20)
-        plt.xticks([0, 1000, 2000, 3000, 4000, 5000], ["$0$", "$1000$", "$2000$", "$3000$", "$4000$", "$5000$"], fontsize = 20)
+        plt.xticks(fontsize = 20)
         plt.yticks(fontsize = 20)
         plt.xlabel("Iterations", fontsize=20)
         plt.ylabel("\% Reach", fontsize=20)
@@ -230,7 +228,8 @@ else:
         frame.set_edgecolor('0.')
         
         #plt.savefig("/home/sforesti/scm/PhD/cogsci2016/include/obj-explo.pdf", format='pdf', dpi=100, bbox_inches='tight')
-        plt.savefig("/home/sforesti/scm/Flowers/NIPS2017/figs/touch_" + s_space2 + '.pdf', format='pdf', dpi=100, bbox_inches='tight')
+        plt.savefig(path + "figs/touch_" + s_space2 + '.pdf', format='pdf', dpi=100, bbox_inches='tight')
+        plt.savefig(path + "figs/touch_" + s_space2 + '.png', format='png', dpi=100, bbox_inches='tight')
         
         
         plt.show(block=False)

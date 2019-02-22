@@ -34,15 +34,14 @@ if simu:
 else:
     
     # PARAMS
-    path = "/home/sforesti/scm/Flowers/NIPS2017/data/logs/"
-    experiment_name = "nips_4_mai"
-    configs = dict(RMB=3)#, RMB=3, RmB=1, FC=3, OS=3)
-    n = 5000
+    experiment_name = "1268_157"
+    path = "/data/APEX/" + experiment_name + "/"
+    configs = dict(AMB=12)#, RMB=3, RmB=1, FC=3, OS=3)
+    n = 20000
     j_error = 0.02
 
 
 n_logs = 1
-n = 5000 # Iterations taken into account
 p = 20 # Number of checkpoints
 x = range(n)
 
@@ -183,7 +182,7 @@ else:
         explo_discovery = cPickle.load(f)
     f.close()
     
-    config = "RMB"
+    config = "AMB"
     trials = range(configs[config])
     trials = [0]
     print trials
