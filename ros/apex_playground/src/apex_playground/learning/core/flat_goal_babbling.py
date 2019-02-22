@@ -21,7 +21,8 @@ class FGB(object):
         self.progresses_evolution = {}
         self.interests_evolution = {}
         self.mid_control = ""
-            
+        self.ms = None
+
         # Define motor and sensory spaces:
         m_ndims = self.conf.m_ndims # number of motor parameters
         
@@ -133,25 +134,13 @@ class FGB(object):
     
     def perceive(self, s, m_demo=None, j_demo=False):
         s = self.sensory_primitive(s)
-        #print "perceive len(s)", len(s), s[92:112]
-        if j_demo or self.ball_moves(s[92:112]):
+        if self.ball_moves(s[92:112]):
             time.sleep(3)
-        if m_demo is not None:
+        if not hasattr(self, "m"):
             return False
-        elif j_demo:
-            return False
-        else:
-            if not hasattr(self, "m"):
-                return False
-            ms = self.set_ms(self.m, s)
-            self.update_sensorimotor_models(ms)
-            if self.mid_control is not None:
-                self.modules[self.mid_control].update_im(self.modules[self.mid_control].get_m(ms), self.modules[self.mid_control].get_s(ms))
+        self.ms = self.set_ms(self.m, s)
+        self.update_sensorimotor_models(self.ms)
         self.t = self.t + 1
-        
-        for mid in self.modules.keys():
-            #self.progresses_evolution[mid].append(self.modules[mid].progress())
-            self.interests_evolution[mid].append(self.modules[mid].interest_model.current_interest)
                 
         return True
     
