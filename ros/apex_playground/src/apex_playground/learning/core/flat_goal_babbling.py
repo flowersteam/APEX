@@ -178,8 +178,8 @@ class FGB(object):
         self.t = self.t + 1
         
         for mid in self.modules.keys():
-            self.progresses_evolution[mid].append(self.modules[mid].progress())
-            self.interests_evolution[mid].append(self.modules[mid].interest())
+            #self.progresses_evolution[mid].append(self.modules[mid].progress())
+            self.interests_evolution[mid].append(self.modules[mid].interest_model.current_interest)
                 
         return True
     
