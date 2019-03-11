@@ -19,6 +19,14 @@ from apex_playground.learning.core.supervised_representation import SupPoppimage
 from environments import ArenaEnvironment, DummyEnvironment
 
 
+MIN_BALL = 2.23606797749979
+MAX_BALL = 97.24257294606731
+MIN_ERGO = -0.20470048121879322
+MAX_ERGO = 0.504016024283959
+MIN_ANGLE = -np.pi
+MAX_ANGLE = 2 * np.pi
+
+
 class Learner(object):
     def __init__(self):
         self.t = 0
@@ -385,10 +393,10 @@ class MUGLLearner(Learner):
                 context = self.representation.representation.ravel()
 
                 if self.debug:
-	                print("Debug produce")
-	                print("module is: ", mid)
-	                print("context is: ", context)
-	                print("using latents: ", context[self.modules[mid].context_mode["context_dims"]])
+                    print("Debug produce")
+                    print("module is: ", mid)
+                    print("context is: ", context)
+                    print("using latents: ", context[self.modules[mid].context_mode["context_dims"]])
 
                 self.m = self.modules[mid].produce(context=context[self.modules[mid].context_mode["context_dims"]],
                                                    explore=explore)
@@ -506,28 +514,31 @@ class FILearner(Learner):
         m_ndims = self.conf.m_ndims  # number of motor parameters
 
         self.m_space = list(range(m_ndims))
-        self.c_dims = range(m_ndims, m_ndims + 2)
-        self.s_ball = range(m_ndims + 2, m_ndims + 4)
-        self.s_ergo = range(m_ndims + 4, m_ndims + 7)
+        self.c_dims = list(range(m_ndims, m_ndims + 2))
+        self.s_ball = list(range(m_ndims + 2, m_ndims + 4))
+        self.s_ergo = list(range(m_ndims + 4, m_ndims + 7))
 
         # Create the learning modules:
         if self.babbling_mode == "FlatFI" or self.babbling_mode == "RandomMotor":
             self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball,
                                                   self.conf,
-                                                  context_mode=dict(mode='mcs', context_n_dims=2,
+                                                  context_mode=dict(mode='mcs',
+                                                                    context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
         elif self.babbling_mode == "ModularFI":
             self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball, self.conf,
-                                                  context_mode=dict(mode='mcs', context_n_dims=2,
+                                                  context_mode=dict(mode='mcs',
+                                                                    context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
             self.modules["mod2"] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ball, self.conf,
-                                                  context_mode=dict(mode='mcs', context_n_dims=2,
+                                                  context_mode=dict(mode='mcs',
+                                                                    context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
                                                                     context_dims=range(2)),
@@ -603,11 +614,23 @@ class FILearner(Learner):
             m = self.produce(c_ball_state, motor_babbling)
 
             _, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.update(m)
+            if self.debug:
+                print("Ball speed: ", abs(c_ball_state[1] - o_ball_state[1]))
+            if abs(c_ball_state[1] - o_ball_state[1]) > 0.1:
+                time.sleep(3)
+                o_img, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.get_current_context()
 
             self.record((c_ball_center, c_arena_center, c_ergo_pos, c_extracted),
                         (o_ball_center, o_arena_center, o_ergo_pos, o_extracted))
-            outcome = np.concatenate([o_ball_state, c_ergo_pos])
-            self.perceive(c_ball_state, outcome)
+
+            context = np.array([(c_ball_state[0] - MIN_BALL)/ MAX_BALL, (c_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
+            outcome_ergo = (o_ergo_pos - MIN_ERGO) / MAX_ERGO
+            outcome_ball = np.array([(o_ball_state[0] - MIN_BALL)/ MAX_BALL, (o_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
+            outcome = np.concatenate([outcome_ball, outcome_ergo])
+            if self.debug:
+                print("context: ", context)
+                print("outcome: ", outcome)
+            self.perceive(context, outcome)
             self.save(experiment_name=self.experiment_name, trial=self.trial, folder=self.save_folder)
 
 
