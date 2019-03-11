@@ -510,7 +510,7 @@ class FILearner(Learner):
 
         # Create the learning modules:
         if self.babbling_mode == "FlatFI" or self.babbling_mode == "RandomMotor":
-            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball,
+            self.modules["mod0"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball,
                                                   self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
@@ -518,13 +518,13 @@ class FILearner(Learner):
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
         elif self.babbling_mode == "ModularFI":
-            self.modules["mod1"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball, self.conf,
+            self.modules["mod0"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
-            self.modules["mod2"] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ball, self.conf,
+            self.modules["mod1"] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ball, self.conf,
                                                   context_mode=dict(mode='mcs', context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
                                                                                             [1., 1.]],
