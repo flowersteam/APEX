@@ -600,7 +600,7 @@ class FILearner(Learner):
         return True
 
     def explore(self, n_iter):
-        for _ in range(n_iter):
+        for _ in tqdm(range(n_iter)):
             self.environment.reset()
             _, c_ball_center, c_arena_center, c_ergo_pos, c_ball_state, c_extracted = self.environment.get_current_context()
 
