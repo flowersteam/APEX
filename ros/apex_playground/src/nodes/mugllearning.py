@@ -491,7 +491,7 @@ class MUGLLearner(Learner):
 
 class FILearner(Learner):
     # TODO : test this one
-    def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial, eps_motor_babbling,
+    def __init__(self, config, environment, babbling_mode, experiment_name, trial, eps_motor_babbling,
                  n_motor_babbling, explo_noise, choice_eps, debug):
         super(FILearner, self).__init__()
         self.debug = debug
@@ -507,8 +507,6 @@ class FILearner(Learner):
         self.choice_eps = choice_eps
 
         self.conf = make_configuration(**config)
-
-        self.n_modules = n_modules
 
         # Define motor and sensory spaces:
         m_ndims = self.conf.m_ndims  # number of motor parameters
@@ -694,7 +692,7 @@ if __name__ == "__main__":
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-1] * 7,
                       s_maxs=[1] * 7)
-        learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
+        learner = FILearner(config, environment, babbling_mode=args.babbling,
                             experiment_name=args.exp_name, trial=args.trial,
                             eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
                             explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
