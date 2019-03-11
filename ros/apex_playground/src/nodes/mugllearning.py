@@ -468,7 +468,7 @@ class MUGLLearner(Learner):
             o_img, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.update(m)
             if self.debug:
                 print("Ball speed: ", abs(c_ball_state[1] - o_ball_state[1]))
-            if abs(c_ball_state[1] - o_ball_state[1]) > 0.1:
+            if abs(c_ball_state[1] - o_ball_state[1]) > 0.05:
                 time.sleep(3)
                 o_img, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.get_current_context()
             o_img = self.preprocess_image(o_img)
@@ -614,7 +614,7 @@ class FILearner(Learner):
             _, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.update(m)
             if self.debug:
                 print("Ball speed: ", abs(c_ball_state[1] - o_ball_state[1]))
-            if abs(c_ball_state[1] - o_ball_state[1]) > 0.1:
+            if abs(c_ball_state[1] - o_ball_state[1]) > 0.05:
                 time.sleep(3)
                 o_img, o_ball_center, o_arena_center, o_ergo_pos, o_ball_state, o_extracted = self.environment.get_current_context()
 
