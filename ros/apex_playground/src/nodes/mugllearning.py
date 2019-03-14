@@ -629,10 +629,10 @@ class FILearner(Learner):
 
             context = np.array([(c_ball_state[0] - MIN_BALL) / MAX_BALL, (c_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
 
-            outcome_ergo = o_ergo_pos.sopy()
-            outcome_ergo[:, 0] = (outcome_ergo[:, 0] - MIN_ERGO_0) / (MAX_ERGO_0 - MIN_ERGO_0)
-            outcome_ergo[:, 1] = (outcome_ergo[:, 1] - MIN_ERGO_1) / (MAX_ERGO_1 - MIN_ERGO_1)
-            outcome_ergo[:, 2] = (outcome_ergo[:, 2] - MIN_ERGO_2) / (MAX_ERGO_2 - MIN_ERGO_2)
+            outcome_ergo = o_ergo_pos.copy()
+            outcome_ergo[0] = (outcome_ergo[0] - MIN_ERGO_0) / (MAX_ERGO_0 - MIN_ERGO_0)
+            outcome_ergo[1] = (outcome_ergo[1] - MIN_ERGO_1) / (MAX_ERGO_1 - MIN_ERGO_1)
+            outcome_ergo[2] = (outcome_ergo[2] - MIN_ERGO_2) / (MAX_ERGO_2 - MIN_ERGO_2)
 
             outcome_ball = np.array([(o_ball_state[0] - MIN_BALL) / MAX_BALL, (o_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
             outcome = np.concatenate([outcome_ball, outcome_ergo])
