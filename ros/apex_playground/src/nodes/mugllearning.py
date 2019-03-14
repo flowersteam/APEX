@@ -19,10 +19,16 @@ from apex_playground.learning.core.supervised_representation import SupPoppimage
 from environments import ArenaEnvironment, DummyEnvironment
 
 
+MAX_ERGO_0 = 0.22995519112438445
+MAX_ERGO_1 = 0.21876757339417296
+MAX_ERGO_2 = 0.3004418427718864
+MIN_ERGO_0 = -0.22934536058273008
+MIN_ERGO_1 = -0.2276997955309279
+MIN_ERGO_2 = 0.012286100889952842
+
 MIN_BALL = 2.23606797749979
 MAX_BALL = 97.24257294606731
-MIN_ERGO = -0.20470048121879322
-MAX_ERGO = 0.504016024283959
+
 MIN_ANGLE = -np.pi
 MAX_ANGLE = 2 * np.pi
 
@@ -518,7 +524,7 @@ class FILearner(Learner):
 
         # Create the learning modules:
         if self.babbling_mode == "FlatFI" or self.babbling_mode == "RandomMotor":
-            self.modules["mod0"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball,
+            self.modules["mod0"] = LearningModule("mod1", self.m_space, self.c_dims + self.s_ball + self.s_ergo,
                                                   self.conf,
                                                   context_mode=dict(mode='mcs',
                                                                     context_n_dims=2,
@@ -534,7 +540,7 @@ class FILearner(Learner):
                                                                                             [1., 1.]],
                                                                     context_dims=range(2)),
                                                   explo_noise=self.explo_noise)
-            self.modules["mod1"] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ball, self.conf,
+            self.modules["mod1"] = LearningModule("mod2", self.m_space, self.c_dims + self.s_ergo, self.conf,
                                                   context_mode=dict(mode='mcs',
                                                                     context_n_dims=2,
                                                                     context_sensory_bounds=[[-1., -1.],
@@ -621,9 +627,14 @@ class FILearner(Learner):
             self.record((c_ball_center, c_arena_center, c_ergo_pos, c_extracted),
                         (o_ball_center, o_arena_center, o_ergo_pos, o_extracted))
 
-            context = np.array([(c_ball_state[0] - MIN_BALL)/ MAX_BALL, (c_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
-            outcome_ergo = (o_ergo_pos - MIN_ERGO) / MAX_ERGO
-            outcome_ball = np.array([(o_ball_state[0] - MIN_BALL)/ MAX_BALL, (o_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
+            context = np.array([(c_ball_state[0] - MIN_BALL) / MAX_BALL, (c_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
+
+            outcome_ergo = o_ergo_pos.sopy()
+            outcome_ergo[:, 0] = (outcome_ergo[:, 0] - MIN_ERGO_0) / (MAX_ERGO_0 - MIN_ERGO_0)
+            outcome_ergo[:, 1] = (outcome_ergo[:, 1] - MIN_ERGO_1) / (MAX_ERGO_1 - MIN_ERGO_1)
+            outcome_ergo[:, 2] = (outcome_ergo[:, 2] - MIN_ERGO_2) / (MAX_ERGO_2 - MIN_ERGO_2)
+
+            outcome_ball = np.array([(o_ball_state[0] - MIN_BALL) / MAX_BALL, (o_ball_state[1] - MIN_ANGLE) / MAX_ANGLE])
             outcome = np.concatenate([outcome_ball, outcome_ergo])
             if self.debug:
                 print("context: ", context)
