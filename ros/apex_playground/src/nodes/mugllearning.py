@@ -675,7 +675,7 @@ if __name__ == "__main__":
                       m_maxs=[1.] * environment.m_ndims,
                       s_mins=[-2.5] * 20,
                       s_maxs=[2.5] * 20)
-        learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
+        learner = FILearner(config, environment, babbling_mode=args.babbling,
                             experiment_name=args.exp_name, trial=args.trial, eps_motor_babbling=1., n_motor_babbling=0,
                             explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
     elif "VAE10" in args.babbling:
