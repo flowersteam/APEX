@@ -9,7 +9,6 @@ import os
 import numpy as np
 from explauto.utils import bounds_min_max
 import scipy.misc
-import datetime
 import json
 import pickle
 
@@ -113,6 +112,11 @@ if __name__ == "__main__":
     for i in range(args.n_iter):
         point = [0, 0, 0, 0, 0, 0]
         mover.move_to(list(point), duration=1.5)
+        # Save context
+        image, _, _, _, _ = position_extractor.get_context()
+        filename = 'context_{}-{}'.format(args.apex, i)
+        scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
+        # Perform random motor command
         m = np.random.uniform(-1, 1, dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
         normalized_traj = dmp.trajectory(m)
         normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
@@ -120,14 +124,14 @@ if __name__ == "__main__":
         for m in traj:
             mover.move_to(list(m))
         image, ball_center, arena_center, ergo_position, extracted = position_extractor.get_context()
-        if extracted:
-            # filename = '{}-{}'.format(args.apex, datetime.datetime.now())
-            filename = '{}-{}'.format(args.apex, i)
-            scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
-            if args.save_pos:
-                data = {"m": np.array(traj, dtype=np.float16),
-                        "ball": np.array(ball_center, dtype=np.float16),
-                        "ergo": np.array(ergo_position)}
-                with open(os.path.join(args.path, filename + '.pickle'), 'wb') as f:
-                    pickle.dump(data, f)
+        # if extracted:
+        # filename = '{}-{}'.format(args.apex, datetime.datetime.now())
+        filename = 'outcome_{}-{}'.format(args.apex, i)
+        scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
+        if args.save_pos:
+            data = {"m": np.array(m, dtype=np.float16),
+                    "ball": np.array(ball_center, dtype=np.float16),
+                    "ergo": np.array(ergo_position)}
+            with open(os.path.join(args.path, filename + '.pickle'), 'wb') as f:
+                pickle.dump(data, f)
 
