@@ -108,9 +108,10 @@ class Learner(object):
 
 class MUGLLearner(Learner):
     def __init__(self, config, environment, babbling_mode, n_modules, experiment_name, trial,
-                 eps_motor_babbling, n_motor_babbling, explo_noise, choice_eps, debug):
+                 eps_motor_babbling, n_motor_babbling, explo_noise, choice_eps, debug, apex):
         super(MUGLLearner, self).__init__()
         self.debug = debug
+        self.apex = apex
 
         self.experiment_name = experiment_name
         self.trial = trial
@@ -494,12 +495,24 @@ class MUGLLearner(Learner):
         image = scipy.misc.imresize(image, (64, 64, 3))
         return image
 
+    def load_data(self):
+        contexts = np.load('context_images_' + self.apex)
+        outcomes = np.load('outcome_images_' + self.apex)
+        params = np.load('params_ergo_' + self.apex)
+        self.mid_control = None
+        for i in range(1000):
+            self.m = params[i]
+            context = contexts[i]
+            outcome = outcomes[i]
+            self.perceive(context, outcome)
+
 
 class FILearner(Learner):
     # TODO : test this one
     def __init__(self, config, environment, babbling_mode, experiment_name, trial, eps_motor_babbling,
-                 n_motor_babbling, explo_noise, choice_eps, debug):
+                 n_motor_babbling, explo_noise, choice_eps, debug, apex):
         super(FILearner, self).__init__()
+        self.apex = apex
         self.debug = debug
 
         self.experiment_name = experiment_name
@@ -677,7 +690,7 @@ if __name__ == "__main__":
                       s_maxs=[2.5] * 20)
         learner = FILearner(config, environment, babbling_mode=args.babbling, n_modules=args.n_modules,
                             experiment_name=args.exp_name, trial=args.trial, eps_motor_babbling=1., n_motor_babbling=0,
-                            explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
+                            explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug, apex=args.apex)
     elif "VAE10" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
@@ -687,7 +700,7 @@ if __name__ == "__main__":
                               experiment_name=args.exp_name, trial=args.trial,
                               eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
                               explo_noise=args.explo_noise, choice_eps=args.eps,
-                              debug=args.debug)
+                              debug=args.debug, apex=args.apex)
     elif "VAE20" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
@@ -697,7 +710,7 @@ if __name__ == "__main__":
                               experiment_name=args.exp_name, trial=args.trial,
                               eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
                               explo_noise=args.explo_noise, choice_eps=args.eps,
-                              debug=args.debug)
+                              debug=args.debug, apex=args.apex)
     elif "FI" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
@@ -706,7 +719,7 @@ if __name__ == "__main__":
         learner = FILearner(config, environment, babbling_mode=args.babbling,
                             experiment_name=args.exp_name, trial=args.trial,
                             eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
-                            explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug)
+                            explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug, apex=args.apex)
     else:
         raise NotImplementedError
 
