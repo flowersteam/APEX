@@ -32,9 +32,9 @@ MAX_BALL = 97.24257294606731
 MIN_ANGLE = -np.pi
 MAX_ANGLE = 2 * np.pi
 
-representations_apex_5000 = {'3': apex_3_5000,
-                             '4': apex_4_5000,
-                             '6': apex_6_5000}
+representations_apex_5000 = {3: apex_3_5000,
+                             4: apex_4_5000,
+                             6: apex_6_5000}
 
 
 class Learner(object):
@@ -523,9 +523,9 @@ class MUGLLearner(Learner):
         return image
 
     def load_data(self, n_iter):
-        contexts = np.load('context_images_' + self.apex + '.npy')[:n_iter]
-        outcomes = np.load('outcome_images_' + self.apex + '.npy')[:n_iter]
-        params = np.load('params_ergo_' + self.apex + '.npy')[:n_iter]
+        contexts = np.load('data/context_images_' + str(self.apex) + '.npy')[:n_iter]
+        outcomes = np.load('data/outcome_images_' + str(self.apex) + '.npy')[:n_iter]
+        params = np.load('data/params_ergo_' + str(self.apex) + '.npy')[:n_iter]
         self.mid_control = None
         for i in range(n_iter):
             self.m = params[i]

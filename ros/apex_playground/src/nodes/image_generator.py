@@ -117,8 +117,8 @@ if __name__ == "__main__":
         filename = 'context_{}-{}'.format(args.apex, i)
         scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
         # Perform random motor command
-        m = np.random.uniform(-1, 1, dmp.n_dmps * dmp.n_bfs + n_dmps) * max_params
-        normalized_traj = dmp.trajectory(m)
+        params = np.random.uniform(-1, 1, dmp.n_dmps * dmp.n_bfs + n_dmps)
+        normalized_traj = dmp.trajectory(params * max_params)
         normalized_traj = bounds_min_max(normalized_traj, n_dmps * [-1.], n_dmps * [1.])
         traj = ((normalized_traj - np.array([-1.] * n_dmps)) / 2.) * (bounds_motors_max - bounds_motors_min) + bounds_motors_min
         for m in traj:
@@ -129,7 +129,7 @@ if __name__ == "__main__":
         filename = 'outcome_{}-{}'.format(args.apex, i)
         scipy.misc.imsave(os.path.join(args.path, filename) + '.jpeg', image)
         if args.save_pos:
-            data = {"m": np.array(m, dtype=np.float16),
+            data = {"m": np.array(params, dtype=np.float16),
                     "ball": np.array(ball_center, dtype=np.float16),
                     "ergo": np.array(ergo_position)}
             with open(os.path.join(args.path, filename + '.pickle'), 'wb') as f:
