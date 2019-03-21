@@ -13,7 +13,7 @@ from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
 
 from apex_playground.learning.core.learning_module import LearningModule
-from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300
+from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300, apex_3_5000, apex_4_5000, apex_6_5000
 from apex_playground.learning.core.supervised_representation import SupPoppimage10_B20_C20_D600, SupPoppimage10_B20_C20_D800
 
 from environments import ArenaEnvironment, DummyEnvironment
@@ -31,6 +31,10 @@ MAX_BALL = 97.24257294606731
 
 MIN_ANGLE = -np.pi
 MAX_ANGLE = 2 * np.pi
+
+representations_apex_5000 = {'3': apex_3_5000,
+                             '4': apex_4_5000,
+                             '6': apex_6_5000}
 
 
 class Learner(object):
@@ -359,6 +363,29 @@ class MUGLLearner(Learner):
                                                       context_sensory_bounds=[[-2.5], [2.5]]),
                                     explo_noise=self.explo_noise)
             self.modules[module_id] = module
+        elif "Online" in self.babbling_mode:
+            if '5000' in self.babbling_mode:
+                self.representation = representations_apex_5000[self.apex]
+            elif '2000' in self.babbling_mode:
+                self.representation = representations_apex_5000[self.apex]
+                raise NotImplementedError
+            # Create one module per n_latents // n_modules
+            for i in range(n_modules):
+                module_id = "mod" + str(i)
+                c_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules]
+                s_mod = self.representation.sorted_latents[
+                        i * self.representation.n_latents // n_modules:(i + 1) * self.representation.n_latents // n_modules] + m_ndims + self.representation.n_latents
+                module = LearningModule(module_id, self.m_space, list(c_mod + m_ndims) + list(s_mod), self.conf,
+                                        interest_model='normal',
+                                        context_mode=dict(mode='mcs',
+                                                          context_n_dims=self.representation.n_latents // n_modules,
+                                                          context_dims=list(c_mod),
+                                                          context_sensory_bounds=[
+                                                              [-2.5] * (self.representation.n_latents // n_modules),
+                                                              [2.5] * (self.representation.n_latents // n_modules)]),
+                                        explo_noise=self.explo_noise)
+                self.modules[module_id] = module
         else:
             raise NotImplementedError
 
@@ -495,12 +522,12 @@ class MUGLLearner(Learner):
         image = scipy.misc.imresize(image, (64, 64, 3))
         return image
 
-    def load_data(self):
-        contexts = np.load('context_images_' + self.apex)
-        outcomes = np.load('outcome_images_' + self.apex)
-        params = np.load('params_ergo_' + self.apex)
+    def load_data(self, n_iter):
+        contexts = np.load('context_images_' + self.apex + '.npy')[:n_iter]
+        outcomes = np.load('outcome_images_' + self.apex + '.npy')[:n_iter]
+        params = np.load('params_ergo_' + self.apex + '.npy')[:n_iter]
         self.mid_control = None
-        for i in range(1000):
+        for i in range(n_iter):
             self.m = params[i]
             context = contexts[i]
             outcome = outcomes[i]
@@ -691,6 +718,16 @@ if __name__ == "__main__":
         learner = FILearner(config, environment, babbling_mode=args.babbling,
                             experiment_name=args.exp_name, trial=args.trial, eps_motor_babbling=1., n_motor_babbling=0,
                             explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug, apex=args.apex)
+    elif "Online" in args.babbling:
+        config = dict(m_mins=[-1.] * environment.m_ndims,
+                      m_maxs=[1.] * environment.m_ndims,
+                      s_mins=[-2.5] * 20,
+                      s_maxs=[2.5] * 20)
+        learner = MUGLLearner(config, environment, babbling_mode=args.babbling, n_modules=1,
+                              experiment_name=args.exp_name, trial=args.trial,
+                              eps_motor_babbling=args.eps_motor_babbling, n_motor_babbling=args.n_motor_babbling,
+                              explo_noise=args.explo_noise, choice_eps=args.eps,
+                              debug=args.debug, apex=args.apex)
     elif "VAE10" in args.babbling:
         config = dict(m_mins=[-1.] * environment.m_ndims,
                       m_maxs=[1.] * environment.m_ndims,
@@ -722,5 +759,9 @@ if __name__ == "__main__":
                             explo_noise=args.explo_noise, choice_eps=args.eps, debug=args.debug, apex=args.apex)
     else:
         raise NotImplementedError
+
+    if "Online" in args.babbling:
+        n_load = int(args.babbling.split('_')[-1])
+        learner.load_data(n_load)
 
     learner.explore(args.n_iter)
