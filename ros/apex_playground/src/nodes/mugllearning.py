@@ -13,7 +13,7 @@ from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
 
 from apex_playground.learning.core.learning_module import LearningModule
-from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300, apex_3_5000, apex_4_5000, apex_6_5000
+from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300, apex_3_5000, apex_4_5000, apex_6_5000, apex_3_2000, apex_4_2000, apex_6_2000
 from apex_playground.learning.core.supervised_representation import SupPoppimage10_B20_C20_D600, SupPoppimage10_B20_C20_D800
 
 from environments import ArenaEnvironment, DummyEnvironment
@@ -367,8 +367,7 @@ class MUGLLearner(Learner):
             if '5000' in self.babbling_mode:
                 self.representation = representations_apex_5000[self.apex]
             elif '2000' in self.babbling_mode:
-                self.representation = representations_apex_5000[self.apex]
-                raise NotImplementedError
+                self.representation = representations_apex_2000[self.apex]
             # Create one module per n_latents // n_modules
             for i in range(n_modules):
                 module_id = "mod" + str(i)
