@@ -35,6 +35,9 @@ MAX_ANGLE = 2 * np.pi
 representations_apex_5000 = {'3': apex_3_5000,
                              '4': apex_4_5000,
                              '6': apex_6_5000}
+representations_apex_2000 = {'3': apex_3_2000,
+                             '4': apex_4_2000,
+                             '6': apex_6_2000}
 
 
 class Learner(object):
@@ -531,6 +534,7 @@ class MUGLLearner(Learner):
             context = contexts[i]
             outcome = outcomes[i]
             self.perceive(context, outcome)
+            self.save(experiment_name=self.experiment_name, trial=self.trial, folder=self.save_folder)
 
 
 class FILearner(Learner):
