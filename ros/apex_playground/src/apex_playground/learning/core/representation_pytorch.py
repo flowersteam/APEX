@@ -876,6 +876,24 @@ apex_6_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=
 apex_6_5000.load_model(model_path)
 apex_6_5000.sorted_latents = np.arange(0, 10)
 
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex3_2000'
+apex_3_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+                                           n_channels=3, height=64, width=64, batch_size=256)
+apex_3_2000.load_model(model_path)
+apex_3_2000.sorted_latents = np.arange(0, 10)
+
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex4_2000'
+apex_4_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+                                           n_channels=3, height=64, width=64, batch_size=256)
+apex_4_2000.load_model(model_path)
+apex_4_2000.sorted_latents = np.arange(0, 10)
+
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex6_2000'
+apex_6_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+                                           n_channels=3, height=64, width=64, batch_size=256)
+apex_6_2000.load_model(model_path)
+apex_6_2000.sorted_latents = np.arange(0, 10)
+
 
 if __name__ == '__main__':
     from latentgoalexplo.environments.armballs import ArmBallsRenderer
