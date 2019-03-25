@@ -525,15 +525,22 @@ class MUGLLearner(Learner):
         return image
 
     def load_data(self, n_iter):
-        contexts = np.load('data/context_images_' + str(self.apex) + '.npy')[:n_iter]
-        outcomes = np.load('data/outcome_images_' + str(self.apex) + '.npy')[:n_iter]
+        context_images = np.load('data/context_images_' + str(self.apex) + '.npy')[:n_iter]
+        outcome_images = np.load('data/outcome_images_' + str(self.apex) + '.npy')[:n_iter]
+        outcome_ergo = np.load('data/outcome_ergo_' + str(self.apex) + '.npy')[:n_iter]
+        outcome_ball = np.load('data/outcome_ball_' + str(self.apex) + '.npy')[:n_iter]
         params = np.load('data/params_ergo_' + str(self.apex) + '.npy')[:n_iter]
         self.mid_control = None
         for i in range(n_iter):
+            self.chosen_modules.append("motor_babbling")
             self.m = params[i]
-            context = contexts[i]
-            outcome = outcomes[i]
+            context = context_images[i]
+            outcome = outcome_images[i]
+            o_ergo = outcome_ergo[i]
+            o_ball = outcome_ball[i]
             self.perceive(context, outcome)
+            self.record((None, None, None, False),
+                        (o_ball, None, o_ergo, True))
             self.save(experiment_name=self.experiment_name, trial=self.trial, folder=self.save_folder)
 
 
@@ -768,3 +775,4 @@ if __name__ == "__main__":
         learner.load_data(n_load)
 
     learner.explore(args.n_iter)
+    environment.ergo_mover.set_compliant(True)
