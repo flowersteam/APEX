@@ -858,23 +858,23 @@ Poppimage20_B15_C50_D300.load_model(model_path)
 Poppimage20_B15_C50_D300.sorted_latents = np.array([0, 15, 12, 7, 18, 8, 5, 19, 13, 14,
                                                     6, 9, 16, 10, 3, 4, 11, 17, 1, 2])
 
-model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex3_5000'
-apex_3_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
-                                           n_channels=3, height=64, width=64, batch_size=256)
-apex_3_5000.load_model(model_path)
-apex_3_5000.sorted_latents = np.arange(0, 10)
-
-model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex4_5000'
-apex_4_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
-                                           n_channels=3, height=64, width=64, batch_size=256)
-apex_4_5000.load_model(model_path)
-apex_4_5000.sorted_latents = np.arange(0, 10)
-
-model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex6_5000'
-apex_6_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
-                                           n_channels=3, height=64, width=64, batch_size=256)
-apex_6_5000.load_model(model_path)
-apex_6_5000.sorted_latents = np.arange(0, 10)
+# model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex3_5000'
+# apex_3_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+#                                            n_channels=3, height=64, width=64, batch_size=256)
+# apex_3_5000.load_model(model_path)
+# apex_3_5000.sorted_latents = np.arange(0, 10)
+#
+# model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex4_5000'
+# apex_4_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+#                                            n_channels=3, height=64, width=64, batch_size=256)
+# apex_4_5000.load_model(model_path)
+# apex_4_5000.sorted_latents = np.arange(0, 10)
+#
+# model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex6_5000'
+# apex_6_5000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+#                                            n_channels=3, height=64, width=64, batch_size=256)
+# apex_6_5000.load_model(model_path)
+# apex_6_5000.sorted_latents = np.arange(0, 10)
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex3_2000'
 apex_3_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
@@ -887,6 +887,12 @@ apex_4_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=
                                            n_channels=3, height=64, width=64, batch_size=256)
 apex_4_2000.load_model(model_path)
 apex_4_2000.sorted_latents = np.arange(0, 10)
+
+model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex5_2000'
+apex_5_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',
+                                           n_channels=3, height=64, width=64, batch_size=256)
+apex_5_2000.load_model(model_path)
+apex_5_2000.sorted_latents = np.arange(0, 10)
 
 model_path = os.path.dirname(os.path.abspath(__file__)) + '/weights/apex6_2000'
 apex_6_2000 = PytorchBetaVAERepresentation(n_latents=10, initial_epochs=0, beta=1, network_type='darlacnn',

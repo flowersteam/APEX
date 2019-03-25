@@ -13,7 +13,7 @@ from explauto.utils import prop_choice
 from explauto.utils.config import make_configuration
 
 from apex_playground.learning.core.learning_module import LearningModule
-from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300, apex_3_5000, apex_4_5000, apex_6_5000, apex_3_2000, apex_4_2000, apex_6_2000
+from apex_playground.learning.core.representation_pytorch import PoppimageVAE10, PoppimageVAE20, Poppimage10_B10_C25_D800, Poppimage20_B15_C30_D300, Poppimage20_B15_C50_D300, apex_3_2000, apex_4_2000, apex_5_2000, apex_6_2000
 from apex_playground.learning.core.supervised_representation import SupPoppimage10_B20_C20_D600, SupPoppimage10_B20_C20_D800
 
 from environments import ArenaEnvironment, DummyEnvironment
@@ -32,11 +32,12 @@ MAX_BALL = 97.24257294606731
 MIN_ANGLE = -np.pi
 MAX_ANGLE = 2 * np.pi
 
-representations_apex_5000 = {3: apex_3_5000,
-                             4: apex_4_5000,
-                             6: apex_6_5000}
+# representations_apex_5000 = {3: apex_3_5000,
+#                              4: apex_4_5000,
+#                              6: apex_6_5000}
 representations_apex_2000 = {3: apex_3_2000,
                              4: apex_4_2000,
+                             5: apex_5_2000,
                              6: apex_6_2000}
 
 
