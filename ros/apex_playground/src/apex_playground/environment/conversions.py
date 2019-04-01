@@ -13,7 +13,7 @@ class EnvironmentConversions(object):
         self.last_angle = None
         with open(join(self.rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
             self.params = json.load(f)
-        self.filename = '~/ball_trajectory.csv'
+        self.filename = '/home/pi/ball_trajectory.csv'
 
     def save_ball_pos(self, x, y):
 		with open(self.filename, 'a') as csvFile:
