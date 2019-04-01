@@ -3,6 +3,8 @@ from rospkg import RosPack
 from apex_playground.msg import CircularState
 from os.path import join
 from numpy import arctan2, sqrt, pi
+import csv
+import time
 
 
 class EnvironmentConversions(object):
@@ -11,6 +13,12 @@ class EnvironmentConversions(object):
         self.last_angle = None
         with open(join(self.rospack.get_path('apex_playground'), 'config', 'environment.json')) as f:
             self.params = json.load(f)
+        self.filename = '~/ball_trajectory.csv'
+
+    def save_ball_pos(self, x, y):
+		with open(self.filename, 'a') as csvFile:
+			writer = csv.writer(csvFile)
+			writer.writerow([str(time.time()), str(x), str(y)])
 
     def get_state(self, ball_center, arena_center, ring_radius):
         """
@@ -18,6 +26,7 @@ class EnvironmentConversions(object):
         :return: a CircularState
         """
         x, y = (ball_center[0] - arena_center[0], ball_center[1] - arena_center[1])
+        self.save_ball_pos(x, y)
         elongation = sqrt(x*x + y*y)
         theta = arctan2(y, x)
         state = CircularState()
