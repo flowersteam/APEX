@@ -2,21 +2,11 @@
     {
         "num_iterations": 20000, 
         "num_trials": 3, 
-        "method": "RMB"
-    }, 
-    {
-        "num_iterations": 20000, 
-        "num_trials": 3, 
         "method": "AMB"
     }, 
     {
         "num_iterations": 20000, 
-        "num_trials": 10, 
-        "method": "FC"
-    }, 
-    {
-        "num_iterations": 20000, 
-        "num_trials": 10, 
+        "num_trials": 3, 
         "method": "OS"
     }
 ]
